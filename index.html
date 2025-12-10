@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Cosmo Shop</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <link rel="stylesheet" href="style.css" />
   <!-- Скрипт Telegram WebApp -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -11,9 +11,31 @@
 <body>
   <div class="app">
     <header class="top-bar">
-      <div class="shop-title">Cosmo Shop</div>
+      <div class="header-inner">
+        <!-- Бургер-кнопка -->
+        <button class="menu-toggle" id="menuToggle" aria-label="Открыть меню">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <!-- Заголовок магазина -->
+        <div class="shop-title">Cosmo Shop</div>
+      </div>
     </header>
- 
+
+    <!-- Выезжающее боковое меню -->
+    <div class="side-menu-backdrop" id="sideMenuBackdrop"></div>
+    <nav class="side-menu" id="sideMenu">
+      <div class="side-menu-title">Меню</div>
+      <div class="side-menu-subtitle">Навигация по магазину</div>
+      <div class="side-menu-buttons">
+        <button class="side-menu-btn">Космо-аксессуары</button>
+        <button class="side-menu-btn">Лучшие наборы</button>
+        <button class="side-menu-btn">О магазине</button>
+      </div>
+    </nav>
+
     <!-- Здесь будет список товаров или страница товара -->
     <main id="view"></main>
 
@@ -26,5 +48,25 @@
   </div>
 
   <script src="script.js"></script>
+  <script>
+    // Логика открытия/закрытия бокового меню
+    const menuToggle = document.getElementById("menuToggle");
+    const sideMenu = document.getElementById("sideMenu");
+    const sideMenuBackdrop = document.getElementById("sideMenuBackdrop");
+
+    if (menuToggle && sideMenu && sideMenuBackdrop) {
+      const closeMenu = () => {
+        sideMenu.classList.remove("open");
+        sideMenuBackdrop.classList.remove("visible");
+      };
+
+      menuToggle.addEventListener("click", () => {
+        sideMenu.classList.add("open");
+        sideMenuBackdrop.classList.add("visible");
+      });
+
+      sideMenuBackdrop.addEventListener("click", closeMenu);
+    }
+  </script>
 </body>
 </html>

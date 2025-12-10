@@ -63,6 +63,47 @@ body::before {
   align-items: center;
   justify-content: center;
   width: 100%;
+  position: relative;
+}
+
+/* Бургер слева */
+.menu-toggle {
+  position: absolute;
+  left: 0;
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.7);
+  padding: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  transition:
+    background 0.16s ease,
+    transform 0.12s ease,
+    box-shadow 0.16s ease;
+}
+
+.menu-toggle:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.8);
+}
+
+.menu-toggle:active {
+  transform: translateY(1px) scale(0.96);
+}
+
+.menu-toggle span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
 }
 
 /* COSMO SHOP */
@@ -76,6 +117,102 @@ body::before {
   text-shadow:
     0 0 8px rgba(0, 0, 0, 0.9),
     0 0 18px rgba(255, 184, 0, 0.9);
+}
+
+/* === СЛАЙД-МЕНЮ СЛЕВА === */
+.side-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 80;
+}
+
+.side-menu-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 70%;
+  max-width: 320px;
+  height: 100%;
+  background: radial-gradient(circle at top, rgba(255,255,255,0.06), rgba(0,0,0,0.96) 55%);
+  box-shadow:
+    8px 0 24px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  padding: 18px 16px 24px;
+  transform: translateX(-100%);
+  transition: transform 0.22s ease-out;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.side-menu.open {
+  transform: translateX(0);
+}
+
+.side-menu-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.9;
+  margin-bottom: 4px;
+}
+
+.side-menu-subtitle {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-bottom: 10px;
+}
+
+/* Жёлтые кнопки меню — как основные */
+.side-menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.side-menu-btn {
+  background: linear-gradient(135deg, #ffb800, #ffe58a);
+  border: none;
+  padding: 11px 18px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14px;
+  color: #201300;
+  text-align: left;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 8px 20px rgba(0, 0, 0, 0.85);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    filter 0.12s ease;
+}
+
+.side-menu-btn:hover {
+  filter: brightness(1.05);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 12px 26px rgba(0, 0, 0, 0.95);
+}
+
+.side-menu-btn:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 6px 16px rgba(0, 0, 0, 0.9);
 }
 
 /* === ОБЛАСТЬ КОНТЕНТА === */
@@ -152,13 +289,9 @@ body::before {
   font-weight: 700;
 }
 
+/* убираем старые скидки */
 .product-discount {
-  background: #ffd300;
-  color: #000;
-  padding: 2px 6px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
+  display: none;
 }
 
 /* === КОНТРОЛЫ КОЛИЧЕСТВА В КАРТОЧКЕ === */
@@ -235,22 +368,22 @@ body::before {
   inset: 0;
   margin: 0;
   display: block;
-  pointer-events: none; /* клики проходят, кроме самих кнопок */
+  pointer-events: none;
 }
 
-/* === НЕОНОВЫЕ ЖЕЛТЫЕ СТРЕЛКИ НА ИЗОБРАЖЕНИИ === */
+/* Стрелки без неона, аккуратные */
 .slider-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(255, 208, 0, 0.45);
-  color: #ffd600;
-  font-size: 22px;
-  font-weight: 700;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 600;
 
   display: flex;
   justify-content: center;
@@ -259,11 +392,7 @@ body::before {
   cursor: pointer;
   pointer-events: auto;
 
-  box-shadow:
-    0 0 10px rgba(255, 200, 0, 0.55),
-    0 0 20px rgba(255, 200, 0, 0.35),
-    inset 0 0 6px rgba(255, 200, 0, 0.25);
-
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.75);
   transition:
     background 0.15s ease,
     box-shadow 0.15s ease,
@@ -271,23 +400,15 @@ body::before {
     border-color 0.15s ease;
 }
 
-/* Hover — яркий неон */
 .slider-btn:hover {
-  background: rgba(255, 220, 0, 0.15);
-  border-color: rgba(255, 220, 0, 0.9);
-  box-shadow:
-    0 0 14px rgba(255, 220, 0, 0.9),
-    0 0 26px rgba(255, 220, 0, 0.65),
-    inset 0 0 10px rgba(255, 220, 0, 0.6);
+  background: rgba(0, 0, 0, 0.85);
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.9);
 }
 
-/* Active — маленький “провал” */
 .slider-btn:active {
-  transform: translateY(-50%) scale(0.9);
-  box-shadow:
-    0 0 8px rgba(255, 200, 0, 0.6),
-    0 0 16px rgba(255, 200, 0, 0.4),
-    inset 0 0 4px rgba(255, 200, 0, 0.6);
+  transform: translateY(-50%) scale(0.92);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.8);
 }
 
 /* Левая стрелка */
@@ -300,7 +421,7 @@ body::before {
   right: 12px;
 }
 
-/* На случай, если в HTML нет prev/next — по первому/последнему элементу */
+/* На случай, если классы не заданы */
 .slider-controls .slider-btn:first-child {
   left: 12px;
   right: auto;

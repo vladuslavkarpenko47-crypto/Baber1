@@ -13,7 +13,7 @@ const products = [
     shortDescription: "Soft toy fox 25cm",
     fullDescription: "Very soft fox toy, 25cm. Hypoallergenic.",
     priceUsdt: 10,
-    discountPercent: 30,
+    discountPercent: 30, // пока не используем
     images: [
       "https://picsum.photos/seed/fox1/600/400",
       "https://picsum.photos/seed/fox2/600/400"
@@ -72,7 +72,6 @@ function renderListView() {
             <p class="product-desc">${p.shortDescription}</p>
             <div class="product-price-row">
               <span class="product-price">${p.priceUsdt} USDT</span>
-              <span class="product-discount">-${p.discountPercent}%</span>
             </div>
             <div class="product-controls" data-id="${p.id}">
               <button class="qty-btn minus">−</button>
@@ -127,9 +126,8 @@ function openProductDetail(id) {
       <div class="detail-slider">
         <img id="detail-image" src="${product.images[0]}" class="detail-image" />
         <div class="slider-controls">
-          <button id="prev-slide" class="slider-btn">‹</button>
-          <span id="slide-indicator">${1} / ${product.images.length}</span>
-          <button id="next-slide" class="slider-btn">›</button>
+          <button id="prev-slide" class="slider-btn prev">‹</button>
+          <button id="next-slide" class="slider-btn next">›</button>
         </div>
       </div>
 
@@ -137,7 +135,6 @@ function openProductDetail(id) {
 
       <div class="detail-price-row">
         <span class="detail-price">${product.priceUsdt} USDT</span>
-        <span class="product-discount">-${product.discountPercent}%</span>
       </div>
 
       <div class="detail-qty-row">
@@ -166,18 +163,15 @@ function openProductDetail(id) {
 
   // Слайдер
   const img = document.getElementById("detail-image");
-  const indicator = document.getElementById("slide-indicator");
 
   document.getElementById("prev-slide").onclick = () => {
     idx = (idx - 1 + product.images.length) % product.images.length;
     img.src = product.images[idx];
-    indicator.textContent = `${idx + 1} / ${product.images.length}`;
   };
 
   document.getElementById("next-slide").onclick = () => {
     idx = (idx + 1) % product.images.length;
     img.src = product.images[idx];
-    indicator.textContent = `${idx + 1} / ${product.images.length}`;
   };
 
   // Количество
@@ -237,3 +231,22 @@ checkoutBtn.onclick = () => {
 
 renderListView();
 updateTotal();
+
+/* === ЛОГИКА БОКОВОГО МЕНЮ (бургер) === */
+const menuToggle = document.getElementById("menuToggle");
+const sideMenu = document.getElementById("sideMenu");
+const sideMenuBackdrop = document.getElementById("sideMenuBackdrop");
+
+if (menuToggle && sideMenu && sideMenuBackdrop) {
+  const closeMenu = () => {
+    sideMenu.classList.remove("open");
+    sideMenuBackdrop.classList.remove("visible");
+  };
+
+  menuToggle.addEventListener("click", () => {
+    sideMenu.classList.add("open");
+    sideMenuBackdrop.classList.add("visible");
+  });
+
+  sideMenuBackdrop.addEventListener("click", closeMenu);
+}
