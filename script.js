@@ -1,15 +1,11 @@
-// =============================
 // Telegram WebApp init
-// =============================
 let tg = null;
 if (window.Telegram && window.Telegram.WebApp) {
   tg = window.Telegram.WebApp;
   tg.expand();
 }
 
-// =============================
 // Промокоды
-// =============================
 const PROMO_CODES = {
   COSMO10: 10,
   COSMO20: 20,
@@ -17,22 +13,18 @@ const PROMO_CODES = {
 
 let activePromo = null;
 
-// =============================
 // Товары
-// =============================
 const products = [
-  { id: 1, name: "Fanvue", shortDescription: "Soft toy fox 25cm", fullDescription: "Very soft fox toy, 25cm. Hypoallergenic.", priceUsdt: 10, images: ["https://picsum.photos/seed/fox1/600/400","https://picsum.photos/seed/fox2/600/400"] },
-  { id: 2, name: "Fansly", shortDescription: "Small cute penguin toy", fullDescription: "Cute small penguin plush toy.", priceUsdt: 12.5, images: ["https://picsum.photos/seed/penguin1/600/400"] },
-  { id: 3, name: "Xvideos", shortDescription: "Metallic toy car", fullDescription: "Premium metal toy car.", priceUsdt: 15, images: ["https://picsum.photos/seed/car1/600/400","https://picsum.photos/seed/car2/600/400"] },
+  { id: 1, name: "Fox Toy", shortDescription: "Soft toy fox 25cm", fullDescription: "Very soft fox toy, 25cm. Hypoallergenic.", priceUsdt: 10, images: ["https://picsum.photos/seed/fox1/600/400","https://picsum.photos/seed/fox2/600/400"] },
+  { id: 2, name: "Penguin", shortDescription: "Small cute penguin toy", fullDescription: "Cute small penguin plush toy.", priceUsdt: 12.5, images: ["https://picsum.photos/seed/penguin1/600/400"] },
+  { id: 3, name: "Toy Car", shortDescription: "Metallic toy car", fullDescription: "Premium metal toy car.", priceUsdt: 15, images: ["https://picsum.photos/seed/car1/600/400","https://picsum.photos/seed/car2/600/400"] },
   { id: 4, name: "Space Bear", shortDescription: "Bear in space suit", fullDescription: "Cute plush bear in a silver astronaut suit.", priceUsdt: 18, images: ["https://picsum.photos/seed/bear1/600/400"] },
   { id: 5, name: "Rocket Lamp", shortDescription: "Rocket night lamp", fullDescription: "Warm rocket night lamp with soft light.", priceUsdt: 22, images: ["https://picsum.photos/seed/rocket1/600/400"] },
   { id: 6, name: "Moon Pillow", shortDescription: "Moon pillow", fullDescription: "Comfortable crescent pillow for sleep.", priceUsdt: 14.5, images: ["https://picsum.photos/seed/moon1/600/400"] },
   { id: 7, name: "Star Garland", shortDescription: "LED star garland", fullDescription: "Warm LED garland with glowing stars.", priceUsdt: 16, images: ["https://picsum.photos/seed/star1/600/400"] },
 ];
 
-// =============================
 // Корзина
-// =============================
 let cart = {};
 products.forEach(p => cart[p.id] = { product: p, qty: 0 });
 
@@ -40,17 +32,13 @@ const viewEl = document.getElementById("view");
 const totalEl = document.getElementById("total");
 const checkoutBtn = document.getElementById("checkout");
 
-// =============================
 // Цена со скидкой
-// =============================
 function getDiscountedPrice(product) {
   if (!activePromo) return product.priceUsdt;
   return +(product.priceUsdt * (1 - activePromo.percent / 100)).toFixed(2);
 }
 
-// =============================
 // Обновить сумму
-// =============================
 function updateTotal() {
   let total = 0;
   Object.values(cart).forEach(({ product, qty }) => {
@@ -59,9 +47,7 @@ function updateTotal() {
   totalEl.textContent = total.toFixed(2);
 }
 
-// =============================
 // Главный каталог
-// =============================
 function renderListView() {
   document.querySelector(".bottom-bar").style.display = "flex";
 
@@ -129,9 +115,7 @@ function renderListView() {
   });
 }
 
-// =============================
 // Детальная страница товара
-// =============================
 function openProductDetail(id) {
   const { product, qty } = cart[id];
   let idx = 0;
@@ -203,9 +187,7 @@ function openProductDetail(id) {
   };
 }
 
-// =============================
-// КОРЗИНА (основная кнопка "Перейти к оплате")
-// =============================
+// КОРЗИНА
 function renderCartView() {
   document.querySelector(".bottom-bar").style.display = "none";
 
@@ -293,9 +275,7 @@ function renderCartView() {
     };
 }
 
-// =============================
 // ПРОМОКОДЫ
-// =============================
 function renderPromoView() {
   document.querySelector(".bottom-bar").style.display = "flex";
 
@@ -340,9 +320,7 @@ function renderPromoView() {
   };
 }
 
-// =============================
 // О магазине
-// =============================
 function renderAboutView() {
   document.querySelector(".bottom-bar").style.display = "flex";
 
@@ -363,23 +341,17 @@ function renderAboutView() {
   document.querySelector(".back-btn").onclick = () => renderListView();
 }
 
-// =============================
 // Нижняя кнопка «Оформить заказ»
-// =============================
 checkoutBtn.onclick = () => {
   renderCartView();
   document.querySelector(".bottom-bar").style.display = "none";
 };
 
-// =============================
 // Запуск
-// =============================
 renderListView();
 updateTotal();
 
-// =============================
 // Бургер-меню
-// =============================
 const menuToggle = document.getElementById("menuToggle");
 const sideMenu = document.getElementById("sideMenu");
 const backdrop = document.getElementById("sideMenuBackdrop");
