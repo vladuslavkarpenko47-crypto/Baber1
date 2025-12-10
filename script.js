@@ -25,7 +25,7 @@ const products = [
   { id: 2, name: "Penguin", shortDescription: "Small cute penguin toy", fullDescription: "Cute small penguin plush toy.", priceUsdt: 12.5, images: ["https://picsum.photos/seed/penguin1/600/400"] },
   { id: 3, name: "Toy Car", shortDescription: "Metallic toy car", fullDescription: "Premium metal toy car.", priceUsdt: 15, images: ["https://picsum.photos/seed/car1/600/400","https://picsum.photos/seed/car2/600/400"] },
   { id: 4, name: "Space Bear", shortDescription: "Bear in space suit", fullDescription: "Cute plush bear in a silver astronaut suit.", priceUsdt: 18, images: ["https://picsum.photos/seed/bear1/600/400"] },
-  { id: 5, name: "Rocket Lamp", shortDescription: "Rocket night lamp", fullDescription: "Soft warm rocket-shaped night lamp.", priceUsdt: 22, images: ["https://picsum.photos/seed/rocket1/600/400"] },
+  { id: 5, name: "Rocket Lamp", shortDescription: "Rocket night lamp", fullDescription: "Warm rocket night lamp with soft light.", priceUsdt: 22, images: ["https://picsum.photos/seed/rocket1/600/400"] },
   { id: 6, name: "Moon Pillow", shortDescription: "Moon pillow", fullDescription: "Comfortable crescent pillow for sleep.", priceUsdt: 14.5, images: ["https://picsum.photos/seed/moon1/600/400"] },
   { id: 7, name: "Star Garland", shortDescription: "LED star garland", fullDescription: "Warm LED garland with glowing stars.", priceUsdt: 16, images: ["https://picsum.photos/seed/star1/600/400"] },
 ];
@@ -34,7 +34,7 @@ const products = [
 // Корзина
 // =============================
 let cart = {};
-products.forEach((p) => (cart[p.id] = { product: p, qty: 0 }));
+products.forEach(p => cart[p.id] = { product: p, qty: 0 });
 
 const viewEl = document.getElementById("view");
 const totalEl = document.getElementById("total");
@@ -49,7 +49,7 @@ function getDiscountedPrice(product) {
 }
 
 // =============================
-// Пересчёт суммы
+// Обновить сумму
 // =============================
 function updateTotal() {
   let total = 0;
@@ -60,68 +60,67 @@ function updateTotal() {
 }
 
 // =============================
-// ГЛАВНЫЙ КАТАЛОГ
+// Главный каталог
 // =============================
 function renderListView() {
+  document.querySelector(".bottom-bar").style.display = "flex";
+
   const html = `
     <div class="product-list">
       ${products
-        .map((p) => {
+        .map(p => {
           const newPrice = getDiscountedPrice(p);
           const discounted = activePromo !== null;
-
           return `
-        <article class="product-card" data-id="${p.id}">
-          <img src="${p.images[0]}" class="product-thumb">
-          <div class="product-info">
-            <h2 class="product-name">${p.name}</h2>
-            <p class="product-desc">${p.shortDescription}</p>
+            <article class="product-card" data-id="${p.id}">
+              <img src="${p.images[0]}" class="product-thumb">
+              <div class="product-info">
+                <h2 class="product-name">${p.name}</h2>
+                <p class="product-desc">${p.shortDescription}</p>
 
-            <div class="product-price-row">
-              ${
-                discounted
-                  ? `
-              <span class="old-price">${p.priceUsdt} USDT</span>
-              <span class="product-price new-price">${newPrice} USDT</span>
-              `
-                  : `<span class="product-price">${p.priceUsdt} USDT</span>`
-              }
-            </div>
+                <div class="product-price-row">
+                  ${
+                    discounted
+                      ? `<span class="old-price">${p.priceUsdt} USDT</span><span class="new-price">${newPrice} USDT</span>`
+                      : `<span class="new-price">${p.priceUsdt} USDT</span>`
+                  }
+                </div>
 
-            <div class="product-controls" data-id="${p.id}">
-              <button class="qty-btn minus">−</button>
-              <span class="quantity">${cart[p.id].qty}</span>
-              <button class="qty-btn plus">+</button>
-            </div>
-          </div>
-        </article>
-      `;
+                <div class="product-controls" data-id="${p.id}">
+                  <button class="qty-btn minus">−</button>
+                  <span class="quantity">${cart[p.id].qty}</span>
+                  <button class="qty-btn plus">+</button>
+                </div>
+              </div>
+            </article>
+          `;
         })
         .join("")}
     </div>
   `;
-
   viewEl.innerHTML = html;
 
-  document.querySelectorAll(".product-card").forEach((card) => {
-    card.addEventListener("click", (e) => {
+  // клик карточки
+  document.querySelectorAll(".product-card").forEach(card => {
+    card.addEventListener("click", e => {
       if (e.target.closest(".product-controls")) return;
       openProductDetail(Number(card.dataset.id));
     });
   });
 
-  document.querySelectorAll(".product-controls").forEach((c) => {
-    const id = Number(c.dataset.id);
-    const qtyEl = c.querySelector(".quantity");
+  // кнопки +/- 
+  document.querySelectorAll(".product-controls").forEach(ctrl => {
+    const id = Number(ctrl.dataset.id);
+    const qtyEl = ctrl.querySelector(".quantity");
 
-    c.querySelector(".minus").onclick = (e) => {
+    ctrl.querySelector(".minus").onclick = e => {
       e.stopPropagation();
       if (cart[id].qty > 0) cart[id].qty--;
       qtyEl.textContent = cart[id].qty;
       updateTotal();
     };
 
-    c.querySelector(".plus").onclick = (e) => {
+    ctrl.querySelector(".plus").onclick = e => {
       e.stopPropagation();
       cart[id].qty++;
       qtyEl.textContent = cart[id].qty;
@@ -131,13 +130,11 @@ function renderListView() {
 }
 
 // =============================
-// ДЕТАЛИ ТОВАРА
+// Детальная страница товара
 // =============================
 function openProductDetail(id) {
   const { product, qty } = cart[id];
   let idx = 0;
-  const newPrice = getDiscountedPrice(product);
-  const discounted = activePromo !== null;
 
   const html = `
     <div class="product-detail">
@@ -153,12 +150,9 @@ function openProductDetail(id) {
 
       <div class="detail-price-row">
         ${
-          discounted
-            ? `
-        <span class="old-price">${product.priceUsdt} USDT</span>
-        <span class="new-price detail-price">${newPrice} USDT</span>
-        `
-            : `<span class="detail-price">${product.priceUsdt} USDT</span>`
+          activePromo
+            ? `<span class="old-price">${product.priceUsdt} USDT</span><span class="new-price">${getDiscountedPrice(product)} USDT</span>`
+            : `<span class="new-price">${product.priceUsdt} USDT</span>`
         }
       </div>
 
@@ -174,13 +168,13 @@ function openProductDetail(id) {
       <p class="product-detail-full">${product.fullDescription}</p>
     </div>
   `;
-
   viewEl.innerHTML = html;
 
+  // Назад
   document.querySelector(".back-btn").onclick = () => renderListView();
 
+  // Слайдер
   const img = document.getElementById("detail-image");
-
   document.getElementById("prev-slide").onclick = () => {
     idx = (idx - 1 + product.images.length) % product.images.length;
     img.src = product.images[idx];
@@ -190,18 +184,18 @@ function openProductDetail(id) {
     img.src = product.images[idx];
   };
 
+  // Количество
   let current = qty;
-
   document.getElementById("detail-minus").onclick = () => {
     if (current > 0) current--;
     document.getElementById("detail-qty").textContent = current;
   };
-
   document.getElementById("detail-plus").onclick = () => {
     current++;
     document.getElementById("detail-qty").textContent = current;
   };
 
+  // Добавить
   document.getElementById("detail-add").onclick = () => {
     cart[id].qty = current;
     updateTotal();
@@ -210,10 +204,12 @@ function openProductDetail(id) {
 }
 
 // =============================
-// НОВАЯ КРАСИВАЯ КОРЗИНА
+// КОРЗИНА (основная кнопка "Перейти к оплате")
 // =============================
 function renderCartView() {
-  const items = Object.values(cart).filter((x) => x.qty > 0);
+  document.querySelector(".bottom-bar").style.display = "none";
+
+  const items = Object.values(cart).filter(x => x.qty > 0);
 
   const html = `
     <div class="product-detail">
@@ -223,33 +219,30 @@ function renderCartView() {
       <div class="cart-list">
         ${
           items.length
-            ? items
-                .map((x) => {
-                  const p = x.product;
-                  const price = getDiscountedPrice(p);
-                  const old = activePromo ? `<span class="old-price">${p.priceUsdt} USDT</span>` : "";
-                  return `
-          <div class="cart-card" data-id="${p.id}">
-            <img src="${p.images[0]}" class="cart-thumb">
+            ? items.map(x => `
+              <div class="cart-card">
+                <img src="${x.product.images[0]}" class="cart-thumb">
 
-            <div class="cart-info">
-              <h2>${p.name}</h2>
+                <div class="cart-info">
+                  <h2>${x.product.name}</h2>
 
-              <div class="cart-price">
-                ${old}
-                <span class="new-price">${price} USDT</span>
+                  <div class="cart-price">
+                    ${
+                      activePromo
+                        ? `<span class="old-price">${x.product.priceUsdt} USDT</span>`
+                        : ""
+                    }
+                    <span class="new-price">${getDiscountedPrice(x.product)} USDT</span>
+                  </div>
+
+                  <div class="cart-controls" data-id="${x.product.id}">
+                    <button class="qty-btn minus">−</button>
+                    <span class="quantity">${x.qty}</span>
+                    <button class="qty-btn plus">+</button>
+                  </div>
+                </div>
               </div>
-
-              <div class="cart-controls" data-id="${p.id}">
-                <button class="qty-btn minus">−</button>
-                <span class="quantity">${x.qty}</span>
-                <button class="qty-btn plus">+</button>
-              </div>
-            </div>
-          </div>
-        `;
-                })
-                .join("")
+            `).join("")
             : `<p class="empty-cart">Корзина пуста</p>`
         }
       </div>
@@ -257,57 +250,65 @@ function renderCartView() {
       ${
         items.length
           ? `
-      <h2 class="cart-total">Итого: ${items
-        .reduce((s, x) => s + getDiscountedPrice(x.product) * x.qty, 0)
-        .toFixed(2)} USDT</h2>
+        <h2 class="cart-total">
+          Итого: ${items.reduce((s, x) => s + getDiscountedPrice(x.product) * x.qty, 0).toFixed(2)} USDT
+        </h2>
 
-      <button id="go-pay" class="detail-add-btn">Перейти к оплате</button>
-      `
+        <button id="go-pay" class="detail-add-btn">Перейти к оплате</button>
+        `
           : ""
       }
     </div>
   `;
-
   viewEl.innerHTML = html;
 
-  document.querySelector(".back-btn").onclick = () => renderListView();
+  // Назад
+  document.querySelector(".back-btn").onclick = () => {
+    renderListView();
+    document.querySelector(".bottom-bar").style.display = "flex";
+  };
 
   // Управление количеством
-  document.querySelectorAll(".cart-controls").forEach((c) => {
-    const id = Number(c.dataset.id);
+  document.querySelectorAll(".cart-controls").forEach(ctrl => {
+    const id = Number(ctrl.dataset.id);
 
-    c.querySelector(".minus").onclick = () => {
+    ctrl.querySelector(".minus").onclick = () => {
       if (cart[id].qty > 0) cart[id].qty--;
-      if (cart[id].qty === 0) return renderCartView();
       renderCartView();
       updateTotal();
     };
 
-    c.querySelector(".plus").onclick = () => {
+    ctrl.querySelector(".plus").onclick = () => {
       cart[id].qty++;
       renderCartView();
       updateTotal();
     };
   });
 
-  const payBtn = document.getElementById("go-pay");
-  if (payBtn) payBtn.onclick = () => checkoutBtn.click();
+  // Перейти к оплате
+  const pay = document.getElementById("go-pay");
+  if (pay)
+    pay.onclick = () => {
+      if (tg) tg.sendData("PAY_NOW");
+    };
 }
 
 // =============================
-// Промокоды
+// ПРОМОКОДЫ
 // =============================
 function renderPromoView() {
+  document.querySelector(".bottom-bar").style.display = "flex";
+
   const html = `
     <div class="product-detail">
       <button class="back-btn">← Назад</button>
       <h1 class="product-detail-title">Промокоды</h1>
 
-      <input id="promo-input" placeholder="Например: COSMO10"
-        style="width:100%; padding:12px; border-radius:12px;
-        background:#00000070; border:1px solid #ffffff22; color:white;">
+      <input id="promo-input" placeholder="Введите промокод"
+        style="width:100%; padding:12px; margin-top:12px;
+        border-radius:12px; background:#00000070; border:1px solid #ffffff33; color:white;">
 
-      <button id="promo-apply" class="detail-add-btn" style="margin-top:10px;">
+      <button id="promo-apply" class="detail-add-btn" style="margin-top:14px;">
         Активировать
       </button>
 
@@ -316,6 +317,7 @@ function renderPromoView() {
   `;
   viewEl.innerHTML = html;
 
+  // Назад
   document.querySelector(".back-btn").onclick = () => renderListView();
 
   const input = document.getElementById("promo-input");
@@ -323,16 +325,14 @@ function renderPromoView() {
 
   document.getElementById("promo-apply").onclick = () => {
     const code = input.value.trim().toUpperCase();
-
     if (!PROMO_CODES[code]) {
       msg.textContent = "Неверный промокод.";
-      msg.style.color = "#ff6b6b";
+      msg.style.color = "#ff6666";
       return;
     }
 
     activePromo = { code, percent: PROMO_CODES[code] };
-
-    msg.textContent = `Промокод применён: -${activePromo.percent}%`;
+    msg.textContent = `Промокод активирован: -${activePromo.percent}%`;
     msg.style.color = "#aaffaa";
 
     updateTotal();
@@ -344,22 +344,32 @@ function renderPromoView() {
 // О магазине
 // =============================
 function renderAboutView() {
+  document.querySelector(".bottom-bar").style.display = "flex";
+
   viewEl.innerHTML = `
     <div class="product-detail">
       <button class="back-btn">← Назад</button>
       <h1 class="product-detail-title">О магазине</h1>
 
-      <p class="product-detail-short expanded">COSMO SHOP — мини-магазин в Telegram.</p>
-      <p class="product-detail-full visible">Тут будет информация, FAQ и контакты.</p>
+      <p class="product-detail-short expanded">
+        COSMO SHOP — мини-магазин в Telegram.
+      </p>
+      <p class="product-detail-full visible">
+        Здесь будет информация о доставке, оплате и поддержке.
+      </p>
     </div>
   `;
+
   document.querySelector(".back-btn").onclick = () => renderListView();
 }
 
 // =============================
-// Оформить заказ = открыть корзину!
+// Нижняя кнопка «Оформить заказ»
 // =============================
-checkoutBtn.onclick = () => renderCartView();
+checkoutBtn.onclick = () => {
+  renderCartView();
+  document.querySelector(".bottom-bar").style.display = "none";
+};
 
 // =============================
 // Запуск
@@ -368,37 +378,37 @@ renderListView();
 updateTotal();
 
 // =============================
-// Бургер меню
+// Бургер-меню
 // =============================
 const menuToggle = document.getElementById("menuToggle");
 const sideMenu = document.getElementById("sideMenu");
-const sideMenuBackdrop = document.getElementById("sideMenuBackdrop");
-
-function closeMenu() {
-  sideMenu.classList.remove("open");
-  sideMenuBackdrop.classList.remove("visible");
-}
+const backdrop = document.getElementById("sideMenuBackdrop");
+const sideButtons = document.querySelectorAll(".side-menu-btn");
 
 menuToggle.onclick = () => {
   sideMenu.classList.add("open");
-  sideMenuBackdrop.classList.add("visible");
+  backdrop.classList.add("visible");
 };
 
-sideMenuBackdrop.onclick = closeMenu;
+backdrop.onclick = () => {
+  sideMenu.classList.remove("open");
+  backdrop.classList.remove("visible");
+};
 
-const buttons = document.querySelectorAll(".side-menu-btn");
-
-buttons[0].onclick = () => {
-  closeMenu();
+sideButtons[0].onclick = () => {
+  sideMenu.classList.remove("open");
+  backdrop.classList.remove("visible");
   renderPromoView();
 };
 
-buttons[1].onclick = () => {
-  closeMenu();
+sideButtons[1].onclick = () => {
+  sideMenu.classList.remove("open");
+  backdrop.classList.remove("visible");
   renderListView();
 };
 
-buttons[2].onclick = () => {
-  closeMenu();
+sideButtons[2].onclick = () => {
+  sideMenu.classList.remove("open");
+  backdrop.classList.remove("visible");
   renderAboutView();
 };
