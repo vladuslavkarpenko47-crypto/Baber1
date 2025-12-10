@@ -21,9 +21,9 @@ let activePromo = null;
 // Товары
 // =============================
 const products = [
-  { id: 1, name: "Fox Toy", shortDescription: "Soft toy fox 25cm", fullDescription: "Very soft fox toy, 25cm. Hypoallergenic.", priceUsdt: 10, images: ["https://picsum.photos/seed/fox1/600/400","https://picsum.photos/seed/fox2/600/400"] },
-  { id: 2, name: "Penguin", shortDescription: "Small cute penguin toy", fullDescription: "Cute small penguin plush toy.", priceUsdt: 12.5, images: ["https://picsum.photos/seed/penguin1/600/400"] },
-  { id: 3, name: "Toy Car", shortDescription: "Metallic toy car", fullDescription: "Premium metal toy car.", priceUsdt: 15, images: ["https://picsum.photos/seed/car1/600/400","https://picsum.photos/seed/car2/600/400"] },
+  { id: 1, name: "Fanvue", shortDescription: "Soft toy fox 25cm", fullDescription: "Very soft fox toy, 25cm. Hypoallergenic.", priceUsdt: 10, images: ["https://picsum.photos/seed/fox1/600/400","https://picsum.photos/seed/fox2/600/400"] },
+  { id: 2, name: "Fansly", shortDescription: "Small cute penguin toy", fullDescription: "Cute small penguin plush toy.", priceUsdt: 12.5, images: ["https://picsum.photos/seed/penguin1/600/400"] },
+  { id: 3, name: "Xvideos", shortDescription: "Metallic toy car", fullDescription: "Premium metal toy car.", priceUsdt: 15, images: ["https://picsum.photos/seed/car1/600/400","https://picsum.photos/seed/car2/600/400"] },
   { id: 4, name: "Space Bear", shortDescription: "Bear in space suit", fullDescription: "Cute plush bear in a silver astronaut suit.", priceUsdt: 18, images: ["https://picsum.photos/seed/bear1/600/400"] },
   { id: 5, name: "Rocket Lamp", shortDescription: "Rocket night lamp", fullDescription: "Warm rocket night lamp with soft light.", priceUsdt: 22, images: ["https://picsum.photos/seed/rocket1/600/400"] },
   { id: 6, name: "Moon Pillow", shortDescription: "Moon pillow", fullDescription: "Comfortable crescent pillow for sleep.", priceUsdt: 14.5, images: ["https://picsum.photos/seed/moon1/600/400"] },

@@ -3,44 +3,46 @@
 <head>
   <meta charset="UTF-8" />
   <title>COSMO SHOP</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <link rel="stylesheet" href="style.css" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
   <div class="app">
-
     <!-- ХЕДЕР -->
     <header class="top-bar">
-      <div class="header-inner" style="position: relative; width: 100%; text-align: center;">
+      <div class="header-inner">
+        <!-- БУРГЕР-МЕНЮ: 3 ПОЛОСКИ -->
         <div id="menuToggle">
           <span></span>
           <span></span>
           <span></span>
         </div>
+
+        <!-- НАЗВАНИЕ МАГАЗИНА -->
         <div class="shop-title">COSMO SHOP</div>
       </div>
     </header>
 
-    <!-- затемнение -->
+    <!-- ФОН ПОД ВЫЕЗЖАЮЩИМ МЕНЮ -->
     <div id="sideMenuBackdrop"></div>
 
-    <!-- Боковое меню -->
+    <!-- БОКОВОЕ МЕНЮ -->
     <nav id="sideMenu">
       <button class="side-menu-btn">Промокоды</button>
       <button class="side-menu-btn">Каталог</button>
       <button class="side-menu-btn">О магазине</button>
     </nav>
 
-    <!-- Контент -->
+    <!-- КОНТЕНТ (СПИСОК / КОРЗИНА / ПРОМО / О МАГАЗИНЕ) -->
     <main id="view"></main>
 
-    <!-- Нижняя панель -->
+    <!-- НИЖНЯЯ ПАНЕЛЬ -->
     <footer class="bottom-bar">
       <div class="total-text">Итого: <span id="total">0.00</span> USDT</div>
       <button id="checkout">Оформить заказ</button>
     </footer>
-
   </div>
 
   <script src="script.js"></script>
