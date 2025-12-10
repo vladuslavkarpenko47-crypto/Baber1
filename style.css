@@ -670,3 +670,15 @@ body::before {
   font-size: 14px;
   opacity: 0.9;
 }
+.old-price {
+  text-decoration: line-through;
+  opacity: 0.6;
+  font-size: 13px;
+  margin-right: 6px;
+}
+
+.new-price {
+  color: #ffd300;
+  font-weight: 700;
+  font-size: 15px;
+}

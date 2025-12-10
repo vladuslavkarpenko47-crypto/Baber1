@@ -13,7 +13,7 @@ const PROMO_CODES = {
   COSMO20: 20,
 };
 
-let activePromo = null; // { code: 'COSMO10', percent: 10 } или null
+let activePromo = null;
 
 /* === ТОВАРЫ === */
 const products = [
@@ -40,7 +40,7 @@ const products = [
     id: 3,
     name: "Toy Car",
     shortDescription: "Metallic toy car",
-    fullDescription: "A premium quality metal toy car.",
+    fullDescription: "Premium metal toy car.",
     priceUsdt: 15,
     images: [
       "https://picsum.photos/seed/car1/600/400",
@@ -50,58 +50,57 @@ const products = [
   {
     id: 4,
     name: "Space Bear",
-    shortDescription: "Bear in a space suit",
-    fullDescription: "Cute plush bear in a shiny silver space suit.",
+    shortDescription: "Bear in space suit",
+    fullDescription: "Cute plush bear in silver astronaut suit.",
     priceUsdt: 18,
     images: ["https://picsum.photos/seed/bear1/600/400"],
   },
   {
     id: 5,
     name: "Rocket Lamp",
-    shortDescription: "Night lamp rocket",
-    fullDescription: "Soft warm light, rocket-shaped night lamp.",
+    shortDescription: "Rocket night lamp",
+    fullDescription: "Soft warm rocket-shaped lamp.",
     priceUsdt: 22,
     images: ["https://picsum.photos/seed/rocket1/600/400"],
   },
   {
     id: 6,
     name: "Moon Pillow",
-    shortDescription: "Crescent moon pillow",
-    fullDescription: "Comfortable crescent-shaped pillow for sleep.",
+    shortDescription: "Moon-shaped pillow",
+    fullDescription: "Comfortable sleeping moon pillow.",
     priceUsdt: 14.5,
     images: ["https://picsum.photos/seed/moon1/600/400"],
   },
   {
     id: 7,
-    name: "Star String",
-    shortDescription: "String of LED stars",
-    fullDescription: "Warm LED garland with little stars.",
+    name: "Star Garland",
+    shortDescription: "LED star garland",
+    fullDescription: "Warm LED garland with small stars.",
     priceUsdt: 16,
     images: ["https://picsum.photos/seed/star1/600/400"],
   },
 ];
 
+/* === КОРЗИНА === */
 let cart = {};
 products.forEach((p) => (cart[p.id] = { product: p, qty: 0 }));
 
+/* === ЭЛЕМЕНТЫ === */
 const viewEl = document.getElementById("view");
 const totalEl = document.getElementById("total");
 const checkoutBtn = document.getElementById("checkout");
 
-/* === Цена с учётом промокода === */
-function getProductPrice(product) {
-  if (activePromo) {
-    const discounted = product.priceUsdt * (1 - activePromo.percent / 100);
-    return +discounted.toFixed(2);
-  }
-  return product.priceUsdt;
+/* === ПОЛУЧИТЬ ЦЕНУ С УЧЁТОМ ПРОМО === */
+function getDiscountedPrice(product) {
+  if (!activePromo) return product.priceUsdt;
+  return +(product.priceUsdt * (1 - activePromo.percent / 100)).toFixed(2);
 }
 
-/* === Итоговая сумма === */
+/* === ОБНОВИТЬ ИТОГ === */
 function updateTotal() {
   let total = 0;
   Object.values(cart).forEach(({ product, qty }) => {
-    total += getProductPrice(product) * qty;
+    total += getDiscountedPrice(product) * qty;
   });
   totalEl.textContent = total.toFixed(2);
 }
@@ -111,16 +110,30 @@ function renderListView() {
   const listHtml = `
     <div class="product-list">
       ${products
-        .map(
-          (p) => `
+        .map((p) => {
+          const newPrice = getDiscountedPrice(p);
+          const hasDiscount = activePromo !== null;
+          return `
         <article class="product-card" data-id="${p.id}">
           <img src="${p.images[0]}" class="product-thumb" />
+
           <div class="product-info">
             <h2 class="product-name">${p.name}</h2>
             <p class="product-desc">${p.shortDescription}</p>
+
             <div class="product-price-row">
-              <span class="product-price">${getProductPrice(p)} USDT</span>
+              ${
+                hasDiscount
+                  ? `
+                  <span class="old-price">${p.priceUsdt} USDT</span>
+                  <span class="product-price new-price">${newPrice} USDT</span>
+                `
+                  : `
+                  <span class="product-price">${p.priceUsdt} USDT</span>
+                `
+              }
             </div>
+
             <div class="product-controls" data-id="${p.id}">
               <button class="qty-btn minus">−</button>
               <span class="quantity">${cart[p.id].qty}</span>
@@ -128,14 +141,15 @@ function renderListView() {
             </div>
           </div>
         </article>
-      `
-        )
+      `;
+        })
         .join("")}
     </div>
   `;
 
   viewEl.innerHTML = listHtml;
 
+  /* Слушатели */
   document.querySelectorAll(".product-card").forEach((card) => {
     card.addEventListener("click", (e) => {
       if (e.target.closest(".product-controls")) return;
@@ -168,6 +182,9 @@ function openProductDetail(id) {
   const { product, qty } = cart[id];
   let idx = 0;
 
+  const newPrice = getDiscountedPrice(product);
+  const hasDiscount = activePromo !== null;
+
   const html = `
     <div class="product-detail">
       <button class="back-btn">← Назад</button>
@@ -183,7 +200,16 @@ function openProductDetail(id) {
       <h1 class="product-detail-title">${product.name}</h1>
 
       <div class="detail-price-row">
-        <span class="detail-price">${getProductPrice(product)} USDT</span>
+        ${
+          hasDiscount
+            ? `
+          <span class="old-price">${product.priceUsdt} USDT</span>
+          <span class="detail-price new-price">${newPrice} USDT</span>
+        `
+            : `
+          <span class="detail-price">${product.priceUsdt} USDT</span>
+        `
+        }
       </div>
 
       <div class="detail-qty-row">
@@ -205,6 +231,7 @@ function openProductDetail(id) {
 
   document.querySelector(".back-btn").onclick = () => renderListView();
 
+  /* Слайдер */
   const img = document.getElementById("detail-image");
   document.getElementById("prev-slide").onclick = () => {
     idx = (idx - 1 + product.images.length) % product.images.length;
@@ -215,16 +242,15 @@ function openProductDetail(id) {
     img.src = product.images[idx];
   };
 
+  /* Количество */
   let curQty = qty;
-  const detailQtyEl = document.getElementById("detail-qty");
-
   document.getElementById("detail-minus").onclick = () => {
     if (curQty > 0) curQty--;
-    detailQtyEl.textContent = curQty;
+    document.getElementById("detail-qty").textContent = curQty;
   };
   document.getElementById("detail-plus").onclick = () => {
     curQty++;
-    detailQtyEl.textContent = curQty;
+    document.getElementById("detail-qty").textContent = curQty;
   };
 
   document.getElementById("detail-add").onclick = () => {
@@ -233,13 +259,9 @@ function openProductDetail(id) {
     renderListView();
   };
 
-  const shortDesc = document.querySelector(".product-detail-short");
-  const fullDesc = document.querySelector(".product-detail-full");
-
-  shortDesc.addEventListener("click", () => {
-    shortDesc.classList.toggle("expanded");
-    fullDesc.classList.toggle("visible");
-  });
+  document.querySelector(".product-detail-short").onclick = () => {
+    document.querySelector(".product-detail-full").classList.toggle("visible");
+  };
 }
 
 /* === СТРАНИЦА ПРОМОКОДА === */
@@ -249,26 +271,16 @@ function renderPromoView() {
       <button class="back-btn">← Назад</button>
       <h1 class="product-detail-title">Промокод</h1>
 
-      <div class="detail-actions">
-        <p class="product-detail-short expanded">
-          Введите промокод для получения скидки.
-        </p>
+      <input id="promo-input"
+        placeholder="Например: COSMO10"
+        class="promo-input"
+        style="width:100%; padding:12px; border-radius:12px;
+        border:1px solid #ffffff30; background:#00000070; color:white; margin-bottom:10px;"
+      />
 
-        <input id="promo-input"
-          placeholder="Например, COSMO10"
-          class="promo-input"
-          style="
-            width:100%; padding:10px 12px; border-radius:12px;
-            border:1px solid rgba(255,255,255,0.25);
-            background:rgba(0,0,0,0.6); color:#fff; font-size:14px;
-            outline:none; margin-top:10px;
-          "
-        />
+      <button id="promo-apply" class="detail-add-btn">Активировать</button>
 
-        <button id="promo-apply" class="detail-add-btn" style="margin-top:6px;">Активировать</button>
-
-        <p id="promo-message" style="margin-top:8px; opacity:0.85;"></p>
-      </div>
+      <p id="promo-msg" style="margin-top:10px; opacity:0.9;"></p>
     </div>
   `;
 
@@ -277,37 +289,37 @@ function renderPromoView() {
   document.querySelector(".back-btn").onclick = () => renderListView();
 
   const input = document.getElementById("promo-input");
-  const msg = document.getElementById("promo-message");
+  const msg = document.getElementById("promo-msg");
 
   document.getElementById("promo-apply").onclick = () => {
     const code = input.value.trim().toUpperCase();
+
     if (!PROMO_CODES[code]) {
-      msg.textContent = "Неверный или устаревший промокод.";
+      msg.textContent = "Неверный промокод.";
       msg.style.color = "#ff6b6b";
       return;
     }
 
     activePromo = { code, percent: PROMO_CODES[code] };
-    msg.textContent = `Промокод ${code} активирован! Скидка ${activePromo.percent}%`;
-    msg.style.color = "#aaffaa";
+    msg.textContent = `Промокод активирован: скидка ${activePromo.percent}%`;
+    msg.style.color = "#a4ff8a";
 
     updateTotal();
+    renderListView();
   };
 }
 
-/* === О МАГАЗИНЕ === */
+/* === СТРАНИЦА О МАГАЗИНЕ === */
 function renderAboutView() {
   viewEl.innerHTML = `
     <div class="product-detail">
       <button class="back-btn">← Назад</button>
       <h1 class="product-detail-title">О магазине</h1>
-
-      <p class="product-detail-short expanded">
-        COSMO SHOP — мини-магазин в Telegram.
+      <p class="product-detail-short">
+        COSMO SHOP — современный мини-магазин в Telegram.
       </p>
-
       <p class="product-detail-full visible">
-        Тут будут информация, FAQ, контакты и условия доставки.
+        Здесь будут FAQ, контакты и условия доставки.
       </p>
     </div>
   `;
@@ -318,24 +330,25 @@ function renderAboutView() {
 /* === ОФОРМЛЕНИЕ ЗАКАЗА === */
 checkoutBtn.onclick = () => {
   const items = Object.values(cart).filter((x) => x.qty > 0);
+
   if (!items.length) {
     alert("Корзина пуста");
     return;
   }
 
   const total = items.reduce(
-    (s, x) => s + getProductPrice(x.product) * x.qty,
+    (sum, x) => sum + getDiscountedPrice(x.product) * x.qty,
     0
   );
 
   const order = {
+    promo: activePromo,
     currency: "USDT",
     total: +total.toFixed(2),
-    promo: activePromo,
     items: items.map(({ product, qty }) => ({
       id: product.id,
       name: product.name,
-      price: getProductPrice(product),
+      price: getDiscountedPrice(product),
       qty,
     })),
   };
@@ -352,15 +365,15 @@ checkoutBtn.onclick = () => {
 renderListView();
 updateTotal();
 
-/* === БУРГЕР-МЕНЮ === */
+/* === БУРГЕР МЕНЮ === */
 const menuToggle = document.getElementById("menuToggle");
 const sideMenu = document.getElementById("sideMenu");
 const sideMenuBackdrop = document.getElementById("sideMenuBackdrop");
 
-let closeMenu = () => {
+function closeMenu() {
   sideMenu.classList.remove("open");
   sideMenuBackdrop.classList.remove("visible");
-};
+}
 
 menuToggle.addEventListener("click", () => {
   sideMenu.classList.add("open");
@@ -369,21 +382,15 @@ menuToggle.addEventListener("click", () => {
 
 sideMenuBackdrop.addEventListener("click", closeMenu);
 
-/* === КНОПКИ В МЕНЮ === */
-const sideMenuButtons = document.querySelectorAll(".side-menu-btn");
-const [promoBtn, catalogBtn, aboutBtn] = sideMenuButtons;
-
-promoBtn.onclick = () => {
+document.querySelectorAll(".side-menu-btn")[0].onclick = () => {
   closeMenu();
   renderPromoView();
 };
-
-catalogBtn.onclick = () => {
+document.querySelectorAll(".side-menu-btn")[1].onclick = () => {
   closeMenu();
   renderListView();
 };
-
-aboutBtn.onclick = () => {
+document.querySelectorAll(".side-menu-btn")[2].onclick = () => {
   closeMenu();
   renderAboutView();
 };
