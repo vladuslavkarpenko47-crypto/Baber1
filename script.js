@@ -1,91 +1,82 @@
-// Telegram WebApp init
-let tg = null;
-if (window.Telegram && window.Telegram.WebApp) {
-  tg = window.Telegram.WebApp;
-  tg.expand();
-} else {
-  alert("Открой магазин внутри Telegram (через кнопку в боте).");
-}
+document.addEventListener("DOMContentLoaded", () => {
+  const tg = window.Telegram?.WebApp;
 
-// Товары (поставь свои)
-const products = [
-  { id: 1, name: "Fox Toy", shortDescription: "Soft toy fox 25cm", priceUsdt: 10 },
-  { id: 2, name: "Penguin", shortDescription: "Small cute penguin toy", priceUsdt: 12.5 },
-  { id: 3, name: "Toy Car", shortDescription: "Metallic toy car", priceUsdt: 15 },
-];
-
-// Корзина
-const cart = {};
-products.forEach(p => (cart[p.id] = { ...p, qty: 0 }));
-
-const viewEl = document.getElementById("view");
-const totalEl = document.getElementById("total");
-const checkoutBtn = document.getElementById("checkout");
-
-function updateTotal() {
-  let total = 0;
-  Object.values(cart).forEach(i => {
-    total += i.qty * i.priceUsdt;
-  });
-  totalEl.textContent = total.toFixed(2);
-}
-
-function renderCatalog() {
-  const html = `
-    <div style="padding:16px; display:flex; flex-direction:column; gap:12px;">
-      ${products.map(p => `
-        <div style="padding:14px; border:1px solid #ffffff33; border-radius:14px; background:#00000055;">
-          <div style="font-weight:700; font-size:16px; color:white;">${p.name}</div>
-          <div style="opacity:.8; margin-top:4px; color:white;">${p.shortDescription}</div>
-          <div style="margin-top:10px; color:white;">Цена: <b>${p.priceUsdt} USDT</b></div>
-
-          <div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
-            <button onclick="dec(${p.id})" style="width:38px; height:38px; border-radius:10px;">−</button>
-            <span style="min-width:24px; text-align:center; color:white;">${cart[p.id].qty}</span>
-            <button onclick="inc(${p.id})" style="width:38px; height:38px; border-radius:10px;">+</button>
-          </div>
-        </div>
-      `).join("")}
-    </div>
-  `;
-  viewEl.innerHTML = html;
-}
-
-window.inc = id => {
-  cart[id].qty++;
-  renderCatalog();
-  updateTotal();
-};
-
-window.dec = id => {
-  if (cart[id].qty > 0) cart[id].qty--;
-  renderCatalog();
-  updateTotal();
-};
-
-// Оформить заказ → отправляем в бота
-checkoutBtn.onclick = () => {
-  const items = Object.values(cart).filter(i => i.qty > 0);
-  if (!items.length) {
-    if (tg) tg.showAlert("Корзина пуста");
+  if (!tg) {
+    alert("❌ Telegram WebApp не найден. Открой магазин через кнопку в боте.");
     return;
   }
 
-  const totalUsdt = items.reduce((s, i) => s + i.qty * i.priceUsdt, 0);
+  tg.ready();
+  tg.expand();
 
-  const order = {
-    type: "order",
-    total_usdt: +totalUsdt.toFixed(2),
-    items: items.map(i => ({
-      name: i.name,
-      qty: i.qty,
-      priceUsdt: i.priceUsdt
-    }))
-  };
+  const products = [
+    { id: 1, name: "Fox Toy", priceUsdt: 10 },
+    { id: 2, name: "Penguin", priceUsdt: 12.5 },
+    { id: 3, name: "Toy Car", priceUsdt: 15 },
+  ];
 
-  tg.sendData(JSON.stringify(order));
-  // tg.close(); // можно включить позже
-};
+  const cart = {};
+  products.forEach(p => (cart[p.id] = { ...p, qty: 0 }));
 
-renderCatalog();
-updateTotal();
+  const viewEl = document.getElementById("view");
+  const totalEl = document.getElementById("total");
+  const checkoutBtn = document.getElementById("checkout");
+
+  function updateTotal() {
+    let total = 0;
+    Object.values(cart).forEach(i => (total += i.qty * i.priceUsdt));
+    totalEl.textContent = total.toFixed(2);
+  }
+
+  function render() {
+    viewEl.innerHTML = `
+      <div style="padding:16px; display:flex; flex-direction:column; gap:10px;">
+        ${products.map(p => `
+          <div style="padding:12px;border:1px solid #ffffff33;border-radius:12px;">
+            <b>${p.name}</b> — ${p.priceUsdt} USDT<br/>
+            <button onclick="window.dec(${p.id})">−</button>
+            <span style="margin:0 10px;">${cart[p.id].qty}</span>
+            <button onclick="window.inc(${p.id})">+</button>
+          </div>
+        `).join("")}
+      </div>
+    `;
+    updateTotal();
+  }
+
+  window.inc = id => { cart[id].qty++; render(); };
+  window.dec = id => { if (cart[id].qty > 0) cart[id].qty--; render(); };
+
+  if (!checkoutBtn) {
+    tg.showAlert("❌ Кнопка #checkout не найдена в index.html");
+    return;
+  }
+
+  checkoutBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    tg.showAlert("✅ Кнопка Оформить заказ нажата");
+
+    const items = Object.values(cart).filter(i => i.qty > 0);
+    if (!items.length) {
+      tg.showAlert("Корзина пуста");
+      return;
+    }
+
+    const order = {
+      type: "order",
+      total_usdt: +items.reduce((s, i) => s + i.qty * i.priceUsdt, 0).toFixed(2),
+      items: items.map(i => ({ name: i.name, qty: i.qty, priceUsdt: i.priceUsdt })),
+    };
+
+    try {
+      tg.sendData(JSON.stringify(order));
+      tg.showAlert("✅ sendData отправлен в бота");
+    } catch (err) {
+      tg.showAlert("❌ Ошибка sendData: " + String(err));
+    }
+  });
+
+  tg.showAlert("✅ script.js загружен");
+  render();
+});
