@@ -267,12 +267,34 @@ function renderCartView() {
     };
   });
 
-  // Перейти к оплате
+  // Перейти к оплате → отправляем заказ в бота
   const pay = document.getElementById("go-pay");
-  if (pay)
+  if (pay && tg) {
     pay.onclick = () => {
-      if (tg) tg.sendData("PAY_NOW");
+      const itemsPayload = items.map(x => ({
+        id: x.product.id,
+        name: x.product.name,
+        qty: x.qty,
+        priceUsdt: getDiscountedPrice(x.product)
+      }));
+
+      const totalUsdt = items.reduce(
+        (s, x) => s + getDiscountedPrice(x.product) * x.qty,
+        0
+      );
+
+      const order = {
+        type: "order",
+        currency: "USDT",
+        total_usdt: +totalUsdt.toFixed(2),
+        items: itemsPayload,
+        promo: activePromo
+      };
+
+      tg.sendData(JSON.stringify(order));
+      tg.close();
     };
+  }
 }
 
 // ПРОМОКОДЫ
@@ -384,3 +406,44 @@ sideButtons[2].onclick = () => {
   backdrop.classList.remove("visible");
   renderAboutView();
 };
+// --- TELEGRAM WEBAPP INIT ---
+let tg = null;
+if (window.Telegram && window.Telegram.WebApp) {
+  tg = window.Telegram.WebApp;
+  tg.expand();
+}
+
+// --- TEST ORDER (потом заменим на реальную корзину) ---
+function buildOrderForBot() {
+  return {
+    type: "order",
+    total_usdt: 1,
+    items: [{ name: "TEST", qty: 1, priceUsdt: 1 }]
+  };
+}
+
+// --- CHECKOUT CLICK ---
+function onCheckoutClick(e) {
+  e.preventDefault();
+
+  if (!tg) {
+    alert("Открой магазин внутри Telegram (через кнопку в боте), а не в браузере.");
+    return;
+  }
+
+  const order = buildOrderForBot();
+
+  // чтобы ты точно видел, что клик отработал
+  tg.showAlert("Отправляю заказ в бота…");
+
+  tg.sendData(JSON.stringify(order));
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("checkout");
+  if (!btn) {
+    if (tg) tg.showAlert("Кнопка #checkout не найдена в index.html");
+    return;
+  }
+  btn.addEventListener("click", onCheckoutClick);
+});
