@@ -71,6 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       tg.sendData(JSON.stringify(order));
+tg.close();
       tg.showAlert("✅ sendData отправлен в бота");
     } catch (err) {
       tg.showAlert("❌ Ошибка sendData: " + String(err));
