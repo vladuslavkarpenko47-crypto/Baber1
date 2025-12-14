@@ -383,3 +383,26 @@ body::before {
   0%, 100% { opacity: 0.55; }
   50% { opacity: 0.85; }
 }
+.about-page {
+  padding: 16px;
+  line-height: 1.6;
+}
+
+.about-page h2 {
+  text-align: center;
+  margin-bottom: 12px;
+  letter-spacing: 0.12em;
+}
+
+.about-page p {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 10px;
+}
+
+.about-footer {
+  text-align: center;
+  margin-top: 18px;
+  opacity: 0.6;
+  font-size: 12px;
+}
