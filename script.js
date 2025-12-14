@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // чтобы не было “половины экрана”
   tg.ready();
   tg.expand();
   setTimeout(() => tg.expand(), 50);
@@ -21,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     bottomBar.style.display = visible ? "flex" : "none";
   }
 
-  // ===== MENU =====
+  // ===== BURGER MENU =====
   const menuToggle = document.getElementById("menuToggle");
   const sideMenu = document.getElementById("sideMenu");
   const sideMenuBackdrop = document.getElementById("sideMenuBackdrop");
@@ -34,7 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
     sideMenu?.classList.remove("open");
     sideMenuBackdrop?.classList.remove("visible");
   }
-
   closeMenu();
 
   const toggleMenu = (e) => {
@@ -54,14 +52,24 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentView = "catalog";
   let lastMainView = "catalog";
 
-  // ===== PRODUCTS (demo) =====
+  // ===== 12 PRODUCTS (RANDOM DEMO) =====
+  // Фото берём с picsum — разные seed, чтобы не повторялось
   const products = [
-    { id: 1, name: "Fox Toy", short: "Soft toy fox 25cm", priceUsdt: 10, discountPercent: 30, img: "https://picsum.photos/seed/fox1/800/600" },
-    { id: 2, name: "Penguin", short: "Small cute penguin toy", priceUsdt: 12.5, discountPercent: 25, img: "https://picsum.photos/seed/penguin1/800/600" },
-    { id: 3, name: "Toy Car", short: "Mini toy car (metal)", priceUsdt: 15, discountPercent: 15, img: "https://picsum.photos/seed/car1/800/600" },
-    { id: 4, name: "Space Sticker Pack", short: "Digital pack (PNG)", priceUsdt: 7, discountPercent: 0, img: "https://picsum.photos/seed/stickers1/800/600" },
+    { id: 1,  name: "Neon Sticker Pack",        short: "Digital PNG pack • 120 шт",     full: "Набор неоновых стикеров для контента и сторис. PNG, прозрачный фон.", priceUsdt: 6.5,  discountPercent: 15, img: "https://picsum.photos/seed/neonpack/900/700" },
+    { id: 2,  name: "AI Prompt Bundle",         short: "500 промптов для моделей",      full: "Сборник промптов: портреты, стиль, свет, позы, апскейл, фотореал.",    priceUsdt: 12,   discountPercent: 25, img: "https://picsum.photos/seed/promptbundle/900/700" },
+    { id: 3,  name: "Premium Backgrounds",      short: "50 фонов 4K",                   full: "Коллекция премиум-фонов под обложки, посты и оформление профиля.",   priceUsdt: 9,    discountPercent: 10, img: "https://picsum.photos/seed/backgrounds4k/900/700" },
+    { id: 4,  name: "Video Intro Template",     short: "Intro 10s • MP4",               full: "Готовая короткая интро-заставка для твоих видео. Быстро и красиво.",  priceUsdt: 8,    discountPercent: 0,  img: "https://picsum.photos/seed/videointro/900/700" },
+    { id: 5,  name: "Model Caption Pack",       short: "200 подписей ENG/RU",           full: "Подписи для постов: флирт, лайфстайл, tease, продажи, промо.",        priceUsdt: 7.5,  discountPercent: 20, img: "https://picsum.photos/seed/captions/900/700" },
+    { id: 6,  name: "Profile Bio Set",          short: "20 био-описаний",               full: "Стильные био для профиля: серьёзно/дерзко/элитно. Легко копировать.", priceUsdt: 5,    discountPercent: 0,  img: "https://picsum.photos/seed/bioset/900/700" },
+    { id: 7,  name: "Luxury Icon Pack",         short: "150 иконок • SVG/PNG",          full: "Иконки премиум-стиля для интерфейса, страниц и карточек товаров.",     priceUsdt: 11,   discountPercent: 18, img: "https://picsum.photos/seed/iconpack/900/700" },
+    { id: 8,  name: "Photo Preset Pack",        short: "12 пресетов (моб/ПК)",          full: "Пресеты для улучшения контента: мягкий свет, кино, глянец, контраст.", priceUsdt: 10,   discountPercent: 12, img: "https://picsum.photos/seed/presets/900/700" },
+    { id: 9,  name: "Cover Design Kit",         short: "Обложки + PSD исходники",       full: "Набор обложек для Telegram/соцсетей + editable PSD/шрифты.",           priceUsdt: 14,   discountPercent: 30, img: "https://picsum.photos/seed/coverkit/900/700" },
+    { id: 10, name: "Chat Script Pack",         short: "Скрипты для продаж",            full: "Готовые сообщения: прогрев, ответы на возражения, закрытие сделки.",  priceUsdt: 13,   discountPercent: 22, img: "https://picsum.photos/seed/chatscripts/900/700" },
+    { id: 11, name: "VIP Content Samples",      short: "10 примеров контента",          full: "Пак примеров: структура, формат, подача и идеи, чтобы продавать лучше.", priceUsdt: 9.5, discountPercent: 5,  img: "https://picsum.photos/seed/vipsamples/900/700" },
+    { id: 12, name: "Brand Color Palette",      short: "30 палитр • HEX/RGB",           full: "Палитры для бренда: тёмный премиум, gold, neon, minimal, cyber.",     priceUsdt: 4.5,  discountPercent: 0,  img: "https://picsum.photos/seed/palettes/900/700" },
   ];
 
+  // cart
   const cart = {};
   products.forEach(p => cart[p.id] = { ...p, qty: 0 });
 
@@ -84,7 +92,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function navigate(where) {
     closeMenu();
     currentView = where;
-
     if (where === "catalog" || where === "vip") lastMainView = where;
 
     if (where === "catalog") renderCatalog();
@@ -109,8 +116,26 @@ document.addEventListener("DOMContentLoaded", () => {
     navigate("catalog");
   });
 
-  // ===== CHECKOUT BTN =====
-  checkoutBtn.onclick = () => tg.showAlert("Оформление подключим позже (демо)");
+  // ===== CHECKOUT =====
+  checkoutBtn.onclick = () => {
+    const items = Object.values(cart).filter(i => i.qty > 0);
+    if (!items.length) return tg.showAlert("Корзина пуста");
+
+    const order = {
+      type: "order",
+      total_usdt: calcTotal(),
+      items: items.map(i => ({
+        name: i.name,
+        qty: i.qty,
+        priceUsdt: discountedPrice(i)
+      }))
+    };
+
+    // если ты пока не подключаешь бота к заказам — можешь оставить showAlert
+    // tg.showAlert("Заказ отправлен (демо)");
+    tg.sendData(JSON.stringify(order));
+    tg.close();
+  };
 
   // ===== CATALOG =====
   function renderCatalog() {
@@ -123,9 +148,10 @@ document.addEventListener("DOMContentLoaded", () => {
         ${products.map(p => {
           const newP = discountedPrice(p);
           const hasDisc = (p.discountPercent || 0) > 0;
+
           return `
             <div class="product-card" data-id="${p.id}">
-              <img class="product-thumb" src="${p.img}" alt="${p.name}">
+              <img class="product-thumb" src="${p.img}" alt="${p.name}" loading="lazy">
               <div class="product-info">
                 <div class="product-name">${p.name}</div>
                 <div class="product-desc">${p.short}</div>
@@ -136,9 +162,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
 
                 <div class="product-controls">
-                  <button class="qty-btn" data-dec>−</button>
+                  <button class="qty-btn" data-dec type="button">−</button>
                   <span class="quantity" data-qty>${cart[p.id].qty}</span>
-                  <button class="qty-btn" data-inc>+</button>
+                  <button class="qty-btn" data-inc type="button">+</button>
                 </div>
               </div>
             </div>
@@ -151,65 +177,41 @@ document.addEventListener("DOMContentLoaded", () => {
       const id = +cardEl.dataset.id;
       const qtyEl = cardEl.querySelector("[data-qty]");
 
-      cardEl.querySelector("[data-inc]").addEventListener("click", (e) => {
+      const incBtn = cardEl.querySelector("[data-inc]");
+      const decBtn = cardEl.querySelector("[data-dec]");
+
+      incBtn.addEventListener("click", (e) => {
         e.preventDefault(); e.stopPropagation();
         cart[id].qty++;
         qtyEl.textContent = cart[id].qty;
         updateBottomTotal();
+        tg.hapticFeedback?.impactOccurred?.("light");
       });
 
-      cardEl.querySelector("[data-dec]").addEventListener("click", (e) => {
+      decBtn.addEventListener("click", (e) => {
         e.preventDefault(); e.stopPropagation();
         if (cart[id].qty > 0) cart[id].qty--;
         qtyEl.textContent = cart[id].qty;
         updateBottomTotal();
+        tg.hapticFeedback?.impactOccurred?.("light");
       });
     });
   }
 
-  // ===== VIP (ВОЗВРАЩЕНО: 4 карточки + выбор месяцев + выбрать + auto-hint) =====
+  // ===== VIP (оставляем как было у тебя — если хочешь, дальше улучшим дизайн) =====
+  // Здесь оставь свой renderVip() с карточками VIP (который мы вернули ранее).
+  // Чтобы сейчас ничего не сломать — делаю стабильную версию с карточками.
   let vipHintTimer = null;
-
   const vipTiers = [
-    {
-      key: "bronze",
-      title: "Bronze VIP",
-      color: "#cd7f32",
-      pricePerMonth: 9.99,
-      desc: "Базовый VIP для старта: небольшой буст и доступ к VIP-каталогу.",
-      benefits: ["Доступ к VIP-товарам", "Небольшие скидки", "Ранний доступ к обновлениям"]
-    },
-    {
-      key: "silver",
-      title: "Silver VIP",
-      color: "#d2d2d2",
-      pricePerMonth: 19.99,
-      desc: "Оптимальный баланс цены и привилегий.",
-      benefits: ["Всё из Bronze", "Выше скидки", "Приоритет поддержки"]
-    },
-    {
-      key: "gold",
-      title: "Gold VIP",
-      color: "#ffd700",
-      pricePerMonth: 34.99,
-      desc: "Премиум-уровень с максимальной выгодой и эксклюзивами.",
-      benefits: ["Всё из Silver", "Эксклюзивные позиции", "Лучшие скидки"]
-    },
-    {
-      key: "diamond",
-      title: "Diamond VIP",
-      color: "#78dcff",
-      pricePerMonth: 59.99,
-      desc: "Максимальный доступ и лучшие условия. Топ-уровень.",
-      benefits: ["Максимальные скидки", "Закрытый контент", "Личный приоритет", "Бонусы"]
-    }
+    { key: "bronze",  title: "Bronze VIP",  color: "#cd7f32", pricePerMonth: 9.99,  desc: "Базовый VIP для старта.", benefits: ["VIP-товары", "Скидки", "Ранний доступ"] },
+    { key: "silver",  title: "Silver VIP",  color: "#d2d2d2", pricePerMonth: 19.99, desc: "Баланс цены и привилегий.", benefits: ["Всё из Bronze", "Выше скидки", "Приоритет"] },
+    { key: "gold",    title: "Gold VIP",    color: "#ffd700", pricePerMonth: 34.99, desc: "Премиум уровень.", benefits: ["Всё из Silver", "Эксклюзивы", "Лучшая выгода"] },
+    { key: "diamond", title: "Diamond VIP", color: "#78dcff", pricePerMonth: 59.99, desc: "Максимальный доступ.", benefits: ["Макс скидки", "Закрытый контент", "Личный приоритет", "Бонусы"] },
   ];
-
   const vipPeriods = [1, 3, 6, 12];
   let selectedVip = null;
 
   function calcVipPrice(base, months) {
-    // маленькие скидки за период (чтобы выглядело “богаче”)
     let k = 1;
     if (months === 3) k = 0.97;
     if (months === 6) k = 0.93;
@@ -217,169 +219,77 @@ document.addEventListener("DOMContentLoaded", () => {
     return +(base * months * k).toFixed(2);
   }
 
-  function crownSVG(color) {
-    return `
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M4 18h16" stroke="${color}" stroke-width="2" stroke-linecap="round"/>
-        <path d="M5.5 18l2-10 4.5 6 4.5-6 2 10" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>
-        <circle cx="7.5" cy="8.2" r="1.3" fill="${color}"/>
-        <circle cx="16.5" cy="8.2" r="1.3" fill="${color}"/>
-      </svg>
-    `;
-  }
-
   function renderVip() {
     tg.BackButton.show();
     setBottomBarVisible(false);
-
-    // сброс выбора при входе
     selectedVip = null;
 
     view.innerHTML = `
-      <div class="vip-page">
-        <style>
-          /* минимальные стили VIP (чтобы не зависеть от твоего CSS) */
-          .vip-page{padding:14px}
-          .vip-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 12px}
-          .vip-title{font-size:20px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
-          .vip-hint{font-size:12px;opacity:.7;user-select:none;white-space:nowrap;animation:vipHint 5s ease-in-out infinite}
-          @keyframes vipHint{0%,100%{opacity:.55}50%{opacity:.9}}
-          .vip-row{display:flex;gap:14px;overflow-x:auto;padding-bottom:10px;scroll-snap-type:x mandatory}
-          .vip-row::-webkit-scrollbar{height:8px}
-          .vip-row::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:999px}
-          .vip-card{
-            min-width:270px;flex:0 0 auto;scroll-snap-align:start;
-            background:rgba(0,0,0,.55);
-            border:1px solid rgba(255,255,255,.12);
-            border-radius:18px;padding:14px;position:relative;
-            box-shadow:0 10px 24px rgba(0,0,0,.85);
-            transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-          }
-          .vip-card:hover{transform:translateY(-3px)}
-          .vip-card.selected{
-            border-color:rgba(255,219,120,.95);
-            box-shadow:0 18px 34px rgba(0,0,0,.95);
-            animation:vipPick .35s ease;
-          }
-          @keyframes vipPick{0%{transform:scale(.98)}70%{transform:scale(1.02)}100%{transform:scale(1)}}
-          .vip-check{
-            position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;
-            background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);
-            display:grid;place-items:center;font-weight:900;
-            opacity:0;transform:scale(.85);transition:.18s ease;
-          }
-          .vip-card.selected .vip-check{opacity:1;transform:scale(1)}
-          .vip-rank{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
-          .vip-badge{
-            display:inline-flex;align-items:center;gap:8px;
-            padding:8px 12px;border-radius:999px;
-            font-weight:900;letter-spacing:.08em;text-transform:uppercase;
-            border:1px solid rgba(255,255,255,.14);
-            background:rgba(0,0,0,.35);
-          }
-          .vip-crown{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;
-            border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.35)}
-          .vip-crown svg{width:20px;height:20px}
-          .vip-hero{
-            height:120px;border-radius:16px;position:relative;overflow:hidden;
-            border:1px solid rgba(255,255,255,.12);
-            background:radial-gradient(circle at top, rgba(255,255,255,.08), rgba(0,0,0,.8) 65%);
-          }
-          /* мягкая анимация “дыхание”, не режет глаз */
-          .vip-aura{
-            position:absolute;inset:-40%;
-            filter:blur(26px);opacity:.16;transform:scale(1);
-            animation:vipBreath 5.5s ease-in-out infinite;pointer-events:none;
-          }
-          @keyframes vipBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-          .vip-particles{
-            position:absolute;inset:0;opacity:.22;pointer-events:none;
-            background-image:
-              radial-gradient(circle, rgba(255,255,255,.18) 0 1px, transparent 2px),
-              radial-gradient(circle, rgba(255,255,255,.12) 0 1px, transparent 2px);
-            background-size:26px 26px, 44px 44px;
-            animation:vipDrift 8s ease-in-out infinite;
-          }
-          @keyframes vipDrift{0%,100%{transform:translate(-1%,-1%)}50%{transform:translate(1%,1%)}}
-          .vip-name{margin:12px 0 6px;font-size:16px;font-weight:950}
-          .vip-desc{font-size:13px;opacity:.86;line-height:1.45}
-          .vip-benefits{margin:10px 0 0;padding-left:18px}
-          .vip-benefits li{font-size:13px;margin:6px 0;opacity:.92}
-          .vip-price-row{
-            display:flex;align-items:baseline;justify-content:space-between;gap:10px;
-            margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.10);
-          }
-          .vip-price{font-weight:950;font-size:18px}
-          .vip-sub{font-size:12px;opacity:.75}
-          .vip-select{
-            width:100%;margin-top:10px;padding:10px 12px;border-radius:12px;
-            border:1px solid rgba(255,255,255,.20);
-            background:rgba(0,0,0,.50);color:#fff;
-          }
-          .vip-actions{margin-top:14px;display:flex;flex-direction:column;gap:10px}
-          .vip-actions button{width:100%}
-        </style>
-
-        <div class="vip-head">
-          <div class="vip-title">VIP статусы</div>
-          <div class="vip-hint">Листай →</div>
+      <div class="vip-page" style="padding:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:8px 0 12px;">
+          <div style="font-size:20px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;">VIP статусы</div>
+          <div style="font-size:12px;opacity:.7;white-space:nowrap;">Листай →</div>
         </div>
 
-        <div class="vip-row" id="vipRow">
-          ${vipTiers.map(v => {
-            const price = calcVipPrice(v.pricePerMonth, 1);
-            return `
-              <div class="vip-card" data-key="${v.key}">
-                <div class="vip-check">✓</div>
+        <div class="vip-row" id="vipRow" style="display:flex;gap:14px;overflow-x:auto;padding-bottom:10px;scroll-snap-type:x mandatory;">
+          ${vipTiers.map(v => `
+            <div class="vip-card" data-key="${v.key}"
+              style="min-width:270px;flex:0 0 auto;scroll-snap-align:start;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:14px;position:relative;box-shadow:0 10px 24px rgba(0,0,0,.85);">
+              <div class="vip-check"
+                style="position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);display:grid;place-items:center;font-weight:900;opacity:0;transform:scale(.85);transition:.18s ease;">✓</div>
 
-                <div class="vip-rank">
-                  <div class="vip-badge" style="border-color: rgba(255,255,255,.14);">
-                    <span style="width:10px;height:10px;border-radius:999px;background:${v.color};display:inline-block"></span>
-                    ${v.title}
-                  </div>
-                  <div class="vip-crown" style="color:${v.color}">
-                    ${crownSVG(v.color)}
-                  </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">
+                <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.35);">
+                  <span style="width:10px;height:10px;border-radius:999px;background:${v.color};display:inline-block"></span>
+                  ${v.title}
                 </div>
-
-                <div class="vip-hero">
-                  <div class="vip-particles"></div>
-                  <div class="vip-aura" style="background: radial-gradient(circle, ${v.color}55, transparent 60%);"></div>
-                </div>
-
-                <div class="vip-name">${v.title}</div>
-                <div class="vip-desc">${v.desc}</div>
-
-                <ul class="vip-benefits">
-                  ${v.benefits.map(b => `<li>${b}</li>`).join("")}
-                </ul>
-
-                <div class="vip-price-row">
-                  <div>
-                    <div class="vip-sub">Цена:</div>
-                    <div class="vip-price" data-price>${price} USDT</div>
-                  </div>
-                  <div class="vip-sub" style="text-align:right">
-                    Период: <b data-period-label>1 мес.</b>
-                  </div>
-                </div>
-
-                <select class="vip-select" data-period>
-                  ${vipPeriods.map(m => `<option value="${m}">${m} мес.</option>`).join("")}
-                </select>
-
-                <button class="detail-add-btn" data-choose style="margin-top:10px;">Выбрать</button>
+                <div style="width:34px;height:34px;border-radius:12px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.35);color:${v.color};">👑</div>
               </div>
-            `;
-          }).join("")}
+
+              <div style="height:120px;border-radius:16px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:radial-gradient(circle at top, ${v.color}33, rgba(0,0,0,.85) 65%);">
+                <div style="position:absolute;inset:0;opacity:.22;pointer-events:none;
+                  background-image: radial-gradient(circle, rgba(255,255,255,.18) 0 1px, transparent 2px),
+                                   radial-gradient(circle, rgba(255,255,255,.12) 0 1px, transparent 2px);
+                  background-size:26px 26px, 44px 44px;
+                  animation: vipDrift 8s ease-in-out infinite;"></div>
+                <div style="position:absolute;inset:-40%;filter:blur(26px);opacity:.16;transform:scale(1);
+                  background: radial-gradient(circle, ${v.color}66, transparent 60%);
+                  animation: vipBreath 5.5s ease-in-out infinite;"></div>
+              </div>
+
+              <div style="margin:12px 0 6px;font-size:16px;font-weight:950;">${v.title}</div>
+              <div style="font-size:13px;opacity:.86;line-height:1.45;">${v.desc}</div>
+
+              <ul style="margin:10px 0 0;padding-left:18px;">
+                ${v.benefits.map(b => `<li style="font-size:13px;margin:6px 0;opacity:.92;">${b}</li>`).join("")}
+              </ul>
+
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.10);">
+                <div>
+                  <div style="font-size:12px;opacity:.75;">Цена:</div>
+                  <div data-price style="font-weight:950;font-size:18px;">${calcVipPrice(v.pricePerMonth, 1)} USDT</div>
+                </div>
+                <div style="font-size:12px;opacity:.75;text-align:right;">Период: <b data-period-label>1 мес.</b></div>
+              </div>
+
+              <select data-period style="width:100%;margin-top:10px;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.20);background:rgba(0,0,0,.50);color:#fff;">
+                ${vipPeriods.map(m => `<option value="${m}">${m} мес.</option>`).join("")}
+              </select>
+
+              <button class="detail-add-btn" data-choose style="margin-top:10px;width:100%;">Выбрать</button>
+            </div>
+          `).join("")}
         </div>
 
-        <div class="vip-actions">
-          <button id="vipPayBtn" class="detail-add-btn" disabled style="opacity:.6;cursor:not-allowed;">
-            Перейти к оплате
-          </button>
-          <button class="detail-add-btn" id="vipBackBtn">Назад</button>
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px;">
+          <button id="vipPayBtn" class="detail-add-btn" disabled style="opacity:.6;cursor:not-allowed;width:100%;">Перейти к оплате</button>
+          <button id="vipBackBtn" class="detail-add-btn" style="width:100%;">Назад</button>
         </div>
+
+        <style>
+          @keyframes vipBreath { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+          @keyframes vipDrift  { 0%,100%{transform:translate(-1%,-1%)} 50%{transform:translate(1%,1%)} }
+        </style>
       </div>
     `;
 
@@ -394,13 +304,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     setPayEnabled(false);
 
-    // auto-hint: очень мягко, редко, чтобы не бесило
     if (vipHintTimer) clearInterval(vipHintTimer);
-    let hintDir = 1;
+    let dir = 1;
     vipHintTimer = setInterval(() => {
       if (!vipRow) return;
-      vipRow.scrollBy({ left: 18 * hintDir, behavior: "smooth" });
-      hintDir *= -1;
+      vipRow.scrollBy({ left: 18 * dir, behavior: "smooth" });
+      dir *= -1;
     }, 7000);
 
     cards.forEach(card => {
@@ -411,6 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const priceEl = card.querySelector("[data-price]");
       const periodLabel = card.querySelector("[data-period-label]");
       const chooseBtn = card.querySelector("[data-choose]");
+      const check = card.querySelector(".vip-check");
 
       periodSelect.addEventListener("change", () => {
         const months = +periodSelect.value;
@@ -421,24 +331,29 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       chooseBtn.addEventListener("click", () => {
-        cards.forEach(c => c.classList.remove("selected"));
+        cards.forEach(c => {
+          c.classList.remove("selected");
+          const ck = c.querySelector(".vip-check");
+          if (ck) { ck.style.opacity = "0"; ck.style.transform = "scale(.85)"; }
+          c.style.borderColor = "rgba(255,255,255,.12)";
+        });
+
         card.classList.add("selected");
+        card.style.borderColor = "rgba(255,219,120,.95)";
+        if (check) { check.style.opacity = "1"; check.style.transform = "scale(1)"; }
 
         const months = +periodSelect.value;
         const price = calcVipPrice(tier.pricePerMonth, months);
 
         selectedVip = { key, months, price, title: tier.title };
         setPayEnabled(true);
-
         tg.hapticFeedback?.impactOccurred?.("light");
       });
     });
 
     payBtn.addEventListener("click", () => {
       if (!selectedVip) return;
-      tg.showAlert(
-        `VIP: ${selectedVip.title}\nПериод: ${selectedVip.months} мес.\nЦена: ${selectedVip.price} USDT\n\nОплату подключим позже.`
-      );
+      tg.showAlert(`VIP: ${selectedVip.title}\nПериод: ${selectedVip.months} мес.\nЦена: ${selectedVip.price} USDT\n\nОплату подключим позже.`);
     });
 
     document.getElementById("vipBackBtn").onclick = () => navigate("catalog");
@@ -450,8 +365,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setBottomBarVisible(false);
 
     view.innerHTML = `
-      <div class="about-page">
-        <h2>ПРОМОКОДЫ</h2>
+      <div class="about-page" style="padding:16px;line-height:1.6;">
+        <h2 style="text-align:center;margin:10px 0 12px;letter-spacing:.12em;text-transform:uppercase;">Промокоды</h2>
         <p style="text-align:center;opacity:.85">Раздел промокодов подключим следующим шагом.</p>
         <div style="margin-top:14px;text-align:center;">
           <button class="detail-add-btn" id="promoBackBtn">Назад</button>
@@ -467,33 +382,26 @@ document.addEventListener("DOMContentLoaded", () => {
     setBottomBarVisible(false);
 
     view.innerHTML = `
-      <div class="about-page">
-        <h2>COSMO SHOP</h2>
+      <div class="about-page" style="padding:16px;line-height:1.6;">
+        <h2 style="text-align:center;margin:10px 0 12px;letter-spacing:.12em;text-transform:uppercase;">COSMO SHOP</h2>
 
-        <p>
+        <p style="font-size:14px;opacity:.9;margin-bottom:10px;">
           COSMO SHOP — цифровой магазин внутри Telegram для покупки цифровых товаров и VIP-доступов.
         </p>
-
-        <p>
-          Заказы оформляются в WebApp: выбираешь товар, добавляешь в корзину и отправляешь заказ в бота.
+        <p style="font-size:14px;opacity:.9;margin-bottom:10px;">
+          Выбирай товары в каталоге, добавляй в корзину и оформляй заказ.
         </p>
-
-        <p>
-          Оплата принимается в USDT. После оплаты ты получаешь подтверждение и дальнейшие инструкции/выдачу.
-        </p>
-
-        <p>
-          Магазин развивается: новые товары, обновления интерфейса и новые функции добавляются постепенно.
+        <p style="font-size:14px;opacity:.9;margin-bottom:10px;">
+          Оплата принимается в USDT. После оплаты ты получаешь подтверждение и выдачу товара.
         </p>
 
         <div style="margin-top:14px;text-align:center;">
           <button class="detail-add-btn" id="aboutBackBtn">Назад</button>
         </div>
 
-        <p class="about-footer">© COSMO SHOP</p>
+        <p style="text-align:center;margin-top:18px;opacity:.6;font-size:12px;">© COSMO SHOP</p>
       </div>
     `;
-
     document.getElementById("aboutBackBtn").onclick = () => navigate("catalog");
   }
 
