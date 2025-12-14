@@ -9,39 +9,37 @@
 </head>
 <body>
   <div class="app">
-    <!-- ХЕДЕР -->
+
+    <!-- HEADER -->
     <header class="top-bar">
       <div class="header-inner">
-        <!-- БУРГЕР-МЕНЮ: 3 ПОЛОСКИ -->
         <div id="menuToggle">
-          <span></span>
-          <span></span>
-          <span></span>
+          <span></span><span></span><span></span>
         </div>
-
-        <!-- НАЗВАНИЕ МАГАЗИНА -->
         <div class="shop-title">COSMO SHOP</div>
       </div>
     </header>
 
-    <!-- ФОН ПОД БОКОВЫМ МЕНЮ -->
+    <!-- BACKDROP -->
     <div id="sideMenuBackdrop"></div>
 
-    <!-- БОКОВОЕ МЕНЮ -->
+    <!-- SIDE MENU -->
     <nav id="sideMenu">
-      <button class="side-menu-btn">Промокоды</button>
-      <button class="side-menu-btn">Каталог</button>
-      <button class="side-menu-btn">О магазине</button>
+      <button class="side-menu-btn" data-nav="catalog">Каталог</button>
+      <button class="side-menu-btn" data-nav="vip">VIP статус</button>
+      <button class="side-menu-btn" data-nav="promo">Промокоды</button>
+      <button class="side-menu-btn" data-nav="about">О магазине</button>
     </nav>
 
-    <!-- КОНТЕНТ -->
+    <!-- CONTENT -->
     <main id="view"></main>
 
-    <!-- НИЖНЯЯ ПАНЕЛЬ -->
+    <!-- BOTTOM BAR -->
     <footer class="bottom-bar">
       <div class="total-text">Итого: <span id="total">0.00</span> USDT</div>
       <button id="checkout">Оформить заказ</button>
     </footer>
+
   </div>
 
   <script src="script.js"></script>
