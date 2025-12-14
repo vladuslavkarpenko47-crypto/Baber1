@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>COSMO SHOP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <link rel="stylesheet" href="app.css?v=2" />
+  <link rel="stylesheet" href="style.css?v=1" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 
@@ -12,7 +12,7 @@
   <div class="app">
     <header class="top-bar">
       <div class="header-inner">
-        <div id="menuToggle" role="button" aria-label="Menu" aria-expanded="false">
+        <div id="menuToggle">
           <span></span><span></span><span></span>
         </div>
         <div class="shop-title">COSMO SHOP</div>
@@ -22,27 +22,20 @@
     <div id="sideMenuBackdrop"></div>
 
     <nav id="sideMenu">
-      <button class="side-menu-btn" data-nav="catalog">Каталог</button>
-      <button class="side-menu-btn" data-nav="vip">VIP статусы</button>
-      <button class="side-menu-btn" data-nav="promo">Промокоды</button>
-      <button class="side-menu-btn" data-nav="about">О магазине</button>
+      <button data-nav="catalog">Каталог</button>
+      <button data-nav="vip">VIP статусы</button>
+      <button data-nav="promo">Промокоды</button>
+      <button data-nav="about">О магазине</button>
     </nav>
 
     <main id="view"></main>
 
     <footer class="bottom-bar">
-      <div class="total-text">Итого: <span id="total">0.00</span> USDT</div>
+      <div>Итого: <span id="total">0</span> USDT</div>
       <button id="checkout">Оформить заказ</button>
     </footer>
   </div>
 
-  <!-- тест -->
-  <div style="position:fixed;top:6px;right:8px;z-index:9999;background:#ffb800;color:#201300;padding:6px 10px;border-radius:999px;font-weight:900;">
-    BUILD TEST
-  </div>
-
-  <script src="script.js?v=13"></script>
+  <script src="script.js?v=1"></script>
 </body>
 </html>
-
-
