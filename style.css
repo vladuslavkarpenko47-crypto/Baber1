@@ -42,4 +42,6 @@
 
   <script src="script.js"></script>
 </body>
+
 </html>
+body { outline: 6px solid red !important; }
