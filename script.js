@@ -62,92 +62,119 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ================== VIP ================== */
-  const vipTiers = [
-    { key: "bronze", title: "Bronze VIP", price: 9 },
-    { key: "silver", title: "Silver VIP", price: 19 },
-    { key: "gold", title: "Gold VIP", price: 35 },
-    { key: "diamond", title: "Diamond VIP", price: 59 },
-  ];
-  const vipPeriods = [1, 3, 6, 12];
-  let selectedVip = null;
+  const VIPS = [
+  {
+    key: "bronze",
+    title: "Bronze VIP",
+    color: "bronze",
+    desc: "Базовый VIP доступ для старта.",
+    benefits: ["VIP товары", "Базовые скидки"],
+    price: 10
+  },
+  {
+    key: "silver",
+    title: "Silver VIP",
+    color: "silver",
+    desc: "Расширенные возможности и бонусы.",
+    benefits: ["Все из Bronze", "Повышенные скидки", "Приоритет"],
+    price: 20
+  },
+  {
+    key: "gold",
+    title: "Gold VIP",
+    color: "gold",
+    desc: "Премиальный уровень доступа.",
+    benefits: ["Все из Silver", "Эксклюзивы", "Поддержка"],
+    price: 35
+  },
+  {
+    key: "diamond",
+    title: "Diamond VIP",
+    color: "diamond",
+    desc: "Максимальный статус без ограничений.",
+    benefits: ["Все преимущества", "Макс. скидки", "Закрытый контент"],
+    price: 60
+  }
+];
 
-  function renderVip() {
-    checkoutBtn.style.display = "none";
+const VIP_PERIODS = [1, 3, 6, 12];
+let vipIndex = 0;
+let vipMonths = 1;
 
-    view.innerHTML = `
-      <div class="vip-page">
-        <div class="vip-title">VIP СТАТУС</div>
-        <div class="vip-row">
-          ${vipTiers.map(v => `
-            <div class="vip-card vip-${v.key}" data-key="${v.key}">
-              <div class="vip-check">✓</div>
+// ================= VIP RENDER =================
+function renderVip() {
+  const vip = VIPS[vipIndex];
 
-              <div class="vip-rank">
-                <div class="vip-badge">${v.title}</div>
-                <div class="vip-crown"></div>
-              </div>
+  view.innerHTML = `
+    <div class="vip-screen ${vip.color}">
+      <div class="vip-swipe-area" id="vipSwipe">
+        <div class="vip-card-single ${vip.color}">
+          <div class="vip-crown">👑</div>
 
-              <div class="vip-hero ${v.key}">
-                <div class="vip-aura ${v.key}"></div>
-              </div>
+          <div class="vip-hero ${vip.color}">
+            <div class="vip-aura ${vip.color}"></div>
+          </div>
 
-              <div class="vip-desc">
-                Эксклюзивный VIP доступ уровня ${v.title}.
-              </div>
+          <h2 class="vip-title">${vip.title}</h2>
+          <p class="vip-desc">${vip.desc}</p>
 
-              <select class="vip-select">
-                ${vipPeriods.map(m => `<option value="${m}">${m} мес.</option>`).join("")}
-              </select>
-
-              <button class="detail-add-btn vip-choose-btn">Выбрать</button>
-            </div>
-          `).join("")}
-        </div>
-
-        <div style="margin-top:14px">
-          <button id="vipPay" class="detail-add-btn" disabled
-            style="opacity:.6;cursor:not-allowed">
-            Перейти к оплате
-          </button>
+          <ul class="vip-benefits">
+            ${vip.benefits.map(b => `<li>${b}</li>`).join("")}
+          </ul>
         </div>
       </div>
-    `;
 
-    const cards = view.querySelectorAll(".vip-card");
-    const payBtn = document.getElementById("vipPay");
+      <div class="vip-bottom">
+        <select id="vipPeriod" class="vip-select">
+          ${VIP_PERIODS.map(m => `
+            <option value="${m}" ${m === vipMonths ? "selected" : ""}>
+              ${m} мес.
+            </option>
+          `).join("")}
+        </select>
 
-    cards.forEach(card => {
-      const btn = card.querySelector(".vip-choose-btn");
-      const select = card.querySelector(".vip-select");
-      const tier = vipTiers.find(v => v.key === card.dataset.key);
+        <div class="vip-price">
+          ${(vip.price * vipMonths).toFixed(2)} USDT
+        </div>
 
-      btn.onclick = () => {
-        cards.forEach(c => c.classList.remove("selected"));
-        card.classList.add("selected");
+        <button class="detail-add-btn">Выбрать</button>
+        <button class="detail-add-btn">Перейти к оплате</button>
+      </div>
+    </div>
+  `;
 
-        const months = +select.value;
-        selectedVip = {
-          tier: tier.title,
-          months,
-          price: (tier.price * months).toFixed(2)
-        };
+  // period change
+  document.getElementById("vipPeriod").onchange = e => {
+    vipMonths = +e.target.value;
+    renderVip();
+  };
 
-        payBtn.disabled = false;
-        payBtn.style.opacity = "1";
-        payBtn.style.cursor = "pointer";
-      };
-    });
+  initVipSwipe();
+}
 
-    payBtn.onclick = () => {
-      if (!selectedVip) return;
-      tg?.showAlert(
-        `VIP: ${selectedVip.tier}\n` +
-        `Период: ${selectedVip.months} мес.\n` +
-        `Цена: ${selectedVip.price} USDT`
-      );
-    };
-  }
+// ================= SWIPE =================
+function initVipSwipe() {
+  const el = document.getElementById("vipSwipe");
+  let startX = 0;
 
+  el.addEventListener("touchstart", e => {
+    startX = e.touches[0].clientX;
+  });
+
+  el.addEventListener("touchend", e => {
+    const dx = e.changedTouches[0].clientX - startX;
+
+    if (Math.abs(dx) < 50) return;
+
+    if (dx < 0 && vipIndex < VIPS.length - 1) {
+      vipIndex++;
+    } else if (dx > 0 && vipIndex > 0) {
+      vipIndex--;
+    }
+
+    renderVip();
+  });
+}
   /* ================== PROMO ================== */
   function renderPromo() {
     checkoutBtn.style.display = "none";

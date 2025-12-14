@@ -297,3 +297,77 @@ body::before {
   border: 1px solid rgba(255,255,255,.2);
   color: #fff;
 }
+/* ===== VIP FULLSCREEN ===== */
+.vip-screen {
+  height: calc(100vh - 140px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.vip-swipe-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vip-card-single {
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  padding: 16px;
+}
+
+.vip-hero {
+  height: 150px;
+  border-radius: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.vip-aura {
+  position: absolute;
+  inset: -40%;
+  filter: blur(24px);
+  opacity: 0.35;
+  animation: vipBreath 4s ease-in-out infinite;
+}
+
+.diamond .vip-aura {
+  animation-duration: 3s;
+  opacity: 0.45;
+}
+
+@keyframes vipBreath {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+.vip-crown {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.vip-bottom {
+  padding: 14px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.75);
+}
+
+.vip-price {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 10px 0;
+}
+
+/* COLORS */
+.bronze .vip-hero { background: radial-gradient(circle, #cd7f32, #000 70%); }
+.silver .vip-hero { background: radial-gradient(circle, #ccc, #000 70%); }
+.gold .vip-hero { background: radial-gradient(circle, #ffd700, #000 70%); }
+.diamond .vip-hero { background: radial-gradient(circle, #6fdcff, #000 75%); }
+
+.bronze .vip-aura { background: #cd7f32; }
+.silver .vip-aura { background: #ccc; }
+.gold .vip-aura { background: #ffd700; }
+.diamond .vip-aura { background: #6fdcff; }
