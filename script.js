@@ -197,64 +197,75 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // catalog
-  function renderCatalog() {
-    currentView = "catalog";
-    tg.BackButton.hide();
-    setBottomBarVisible(true);
-    updateBottomTotal();
+function renderCatalog() {
+  currentView = "catalog";
+  tg.BackButton.hide();
+  setBottomBarVisible(true);
+  updateBottomTotal();
 
-    view.innerHTML = `
-      <div class="product-list">
-        ${products.map(p => {
-          const hasDisc = (p.discountPercent || 0) > 0;
-          const newP = discountedPrice(p);
-          return `
-            <div class="product-card" data-id="${p.id}">
-              <img class="product-thumb" src="${p.images[0]}" alt="${p.name}" loading="lazy">
-              <div class="product-info">
-                <div class="product-name">${p.name}</div>
-                <div class="product-desc">${p.short}</div>
-                <div class="product-price-row">
-                  ${hasDisc ? `<div class="old-price">${p.priceUsdt.toFixed(2)}</div>` : ``}
-                  <div class="new-price">${newP.toFixed(2)} USDT</div>
-                </div>
-                <div class="product-controls" data-controls>
-                  <button class="qty-btn" data-dec type="button">−</button>
-                  <span class="quantity" data-qty>${cart[p.id].qty}</span>
-                  <button class="qty-btn" data-inc type="button">+</button>
-                </div>
+  view.innerHTML = `
+    <div class="vip-cta">
+      <div class="vip-cta-text">
+        <div class="vip-cta-title">VIP статус</div>
+        <div class="vip-cta-sub">Выбери Bronze / Silver / Gold / Diamond</div>
+      </div>
+      <button class="detail-add-btn vip-cta-btn" id="goVip" type="button">Открыть</button>
+    </div>
+
+    <div class="product-list">
+      ${products.map(p => {
+        const hasDisc = (p.discountPercent || 0) > 0;
+        const newP = discountedPrice(p);
+        return `
+          <div class="product-card" data-id="${p.id}">
+            <img class="product-thumb" src="${p.images[0]}" alt="${p.name}" loading="lazy">
+            <div class="product-info">
+              <div class="product-name">${p.name}</div>
+              <div class="product-desc">${p.short}</div>
+              <div class="product-price-row">
+                ${hasDisc ? `<div class="old-price">${p.priceUsdt.toFixed(2)}</div>` : ``}
+                <div class="new-price">${newP.toFixed(2)} USDT</div>
+              </div>
+              <div class="product-controls" data-controls>
+                <button class="qty-btn" data-dec type="button">−</button>
+                <span class="quantity" data-qty>${cart[p.id].qty}</span>
+                <button class="qty-btn" data-inc type="button">+</button>
               </div>
             </div>
-          `;
-        }).join("")}
-      </div>
-    `;
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
 
-    view.querySelectorAll(".product-card").forEach(card => {
-      const id = +card.dataset.id;
-      const controls = card.querySelector("[data-controls]");
-      const qtyEl = card.querySelector("[data-qty]");
+  // VIP button
+  document.getElementById("goVip").onclick = () => navigate("vip");
 
-      card.querySelector("[data-inc]").addEventListener("click", (e) => {
-        e.preventDefault(); e.stopPropagation();
-        cart[id].qty++;
-        qtyEl.textContent = cart[id].qty;
-        updateBottomTotal();
-      });
+  view.querySelectorAll(".product-card").forEach(card => {
+    const id = +card.dataset.id;
+    const controls = card.querySelector("[data-controls]");
+    const qtyEl = card.querySelector("[data-qty]");
 
-      card.querySelector("[data-dec]").addEventListener("click", (e) => {
-        e.preventDefault(); e.stopPropagation();
-        if (cart[id].qty > 0) cart[id].qty--;
-        qtyEl.textContent = cart[id].qty;
-        updateBottomTotal();
-      });
-
-      card.addEventListener("click", (e) => {
-        if (controls.contains(e.target)) return;
-        renderDetail(id);
-      });
+    card.querySelector("[data-inc]").addEventListener("click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      cart[id].qty++;
+      qtyEl.textContent = cart[id].qty;
+      updateBottomTotal();
     });
-  }
+
+    card.querySelector("[data-dec]").addEventListener("click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      if (cart[id].qty > 0) cart[id].qty--;
+      qtyEl.textContent = cart[id].qty;
+      updateBottomTotal();
+    });
+
+    card.addEventListener("click", (e) => {
+      if (controls.contains(e.target)) return;
+      renderDetail(id);
+    });
+  });
+}
 
   // detail
   function renderDetail(productId) {
@@ -367,37 +378,209 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("b").onclick = () => navigate("catalog");
   }
 
-  function renderVip() {
-    currentView = "vip";
-    tg.BackButton.show();
-    setBottomBarVisible(false);
-    view.innerHTML = `
-      <div class="simple-page">
-        <h2>VIP статусы</h2>
-        <p style="text-align:center;">VIP страницу следующим шагом приведём к твоему идеалу (карточки + выбор периода + оплата).</p>
-        <div style="text-align:center;margin-top:14px;">
-          <button class="detail-add-btn" id="v">Назад</button>
-        </div>
-      </div>`;
-    document.getElementById("v").onclick = () => navigate("catalog");
+function renderVip() {
+  currentView = "vip";
+  tg.BackButton.show();
+  setBottomBarVisible(false);
+
+  const vipPlans = [
+    {
+      id: "bronze",
+      name: "Bronze VIP",
+      badge: "Start",
+      icon: "🥉",
+      description: "Базовый VIP доступ для старта. Отлично, чтобы попробовать VIP-формат.",
+      perks: [
+        "Доступ к закрытым VIP-подборкам",
+        "Ранний доступ к новинкам",
+        "Приоритет в поддержке (стандарт)"
+      ],
+      monthlyPrice: 19
+    },
+    {
+      id: "silver",
+      name: "Silver VIP",
+      badge: "Plus",
+      icon: "🥈",
+      description: "Больше материалов и выгоднее цена на срок. Для регулярных покупок.",
+      perks: [
+        "Всё из Bronze + расширенные наборы",
+        "Скидки на новые релизы",
+        "Приоритет поддержки (выше)"
+      ],
+      monthlyPrice: 29
+    },
+    {
+      id: "gold",
+      name: "Gold VIP",
+      badge: "Best",
+      icon: "🥇",
+      description: "Максимум пользы и лучшие подборки. Самый популярный уровень.",
+      perks: [
+        "Всё из Silver + топовые премиум-материалы",
+        "Еженедельные эксклюзивы",
+        "Самый высокий приоритет поддержки"
+      ],
+      monthlyPrice: 49
+    },
+    {
+      id: "diamond",
+      name: "Diamond VIP",
+      badge: "Elite",
+      icon: "💎",
+      description: "Элитный VIP: максимум доступа и самый мощный пакет преимуществ.",
+      perks: [
+        "Всё из Gold + эксклюзивные редкие релизы",
+        "Индивидуальные подборки (по запросу)",
+        "Персональный приоритет поддержки"
+      ],
+      monthlyPrice: 79
+    }
+  ];
+
+  const monthsOptions = [1, 3, 6, 12];
+
+  // выбранные значения
+  let selectedPlanId = null;
+  const selectedMonthsByPlan = {};
+  vipPlans.forEach(p => selectedMonthsByPlan[p.id] = 1);
+
+  function calcVipPrice(plan, months) {
+    // можно сделать скидку за срок (лёгкая, выглядит “по-взрослому”)
+    let coef = 1;
+    if (months === 3) coef = 0.95;
+    if (months === 6) coef = 0.90;
+    if (months === 12) coef = 0.85;
+    return +(plan.monthlyPrice * months * coef).toFixed(2);
   }
 
-  function renderAbout() {
-    currentView = "about";
-    tg.BackButton.show();
-    setBottomBarVisible(false);
-    view.innerHTML = `
-      <div class="simple-page">
-        <h2>COSMO SHOP</h2>
-        <p>COSMO SHOP — магазин в Telegram: товары, VIP и оплата в USDT.</p>
-        <p>Добавляй товары в корзину и оформляй заказ. Далее подключим промокоды и VIP-оплаты.</p>
-        <div style="text-align:center;margin-top:14px;">
-          <button class="detail-add-btn" id="a">Назад</button>
-        </div>
-      </div>`;
-    document.getElementById("a").onclick = () => navigate("catalog");
+  function haptic() {
+    try { tg.hapticFeedback?.impactOccurred?.("light"); } catch {}
   }
 
-  // start
-  navigate("catalog");
-});
+  view.innerHTML = `
+    <div class="vip-page">
+      <div class="vip-top">
+        <h2>VIP статус</h2>
+        <p>Выбери VIP и период (в месяцах). Нажми “Выбрать” — и я отправлю заявку в бота.</p>
+      </div>
+
+      <div class="vip-row">
+        ${vipPlans.map(plan => {
+          const m = selectedMonthsByPlan[plan.id];
+          const price = calcVipPrice(plan, m);
+          return `
+            <div class="vip-cardx" data-plan="${plan.id}">
+              <div class="vip-headx">
+                <div class="vip-namex">${plan.name}</div>
+                <div class="vip-badgex">${plan.badge}</div>
+              </div>
+
+              <div class="vip-art ${plan.id}">
+                <div class="vip-orb"></div>
+                <div class="vip-spark"></div>
+                <div class="vip-icon">${plan.icon}</div>
+              </div>
+
+              <div class="vip-desc">${plan.description}</div>
+
+              <ul class="vip-listx">
+                ${plan.perks.map(x => `<li>${x}</li>`).join("")}
+              </ul>
+
+              <div class="vip-months" data-months>
+                ${monthsOptions.map(mm => `
+                  <button class="vip-chip ${mm === 1 ? "active" : ""}" data-m="${mm}" type="button">${mm} мес</button>
+                `).join("")}
+              </div>
+
+              <div class="vip-pricex" data-price>${price.toFixed(2)} USDT</div>
+              <div class="vip-timehint">Срок: <b data-time>${m}</b> мес</div>
+
+              <button class="detail-add-btn vip-select-btn" data-select type="button">Выбрать</button>
+            </div>
+          `;
+        }).join("")}
+      </div>
+
+      <div style="text-align:center;margin-top:4px;">
+        <button class="detail-add-btn" id="vipBack" type="button">Назад</button>
+      </div>
+    </div>
+  `;
+
+  // навесим обработчики на карточки
+  view.querySelectorAll(".vip-cardx").forEach(card => {
+    const planId = card.getAttribute("data-plan");
+    const plan = vipPlans.find(p => p.id === planId);
+
+    const monthsWrap = card.querySelector("[data-months]");
+    const priceEl = card.querySelector("[data-price]");
+    const timeEl = card.querySelector("[data-time]");
+    const selectBtn = card.querySelector("[data-select]");
+
+    // выбор месяцев
+    monthsWrap.querySelectorAll(".vip-chip").forEach(chip => {
+      chip.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const mm = Number(chip.getAttribute("data-m"));
+        selectedMonthsByPlan[planId] = mm;
+
+        monthsWrap.querySelectorAll(".vip-chip").forEach(x => x.classList.remove("active"));
+        chip.classList.add("active");
+
+        const newPrice = calcVipPrice(plan, mm);
+        priceEl.textContent = `${newPrice.toFixed(2)} USDT`;
+        timeEl.textContent = `${mm}`;
+
+        // если уже выбран этот план — усилим визуально
+        if (selectedPlanId === planId) {
+          selectBtn.classList.add("selected");
+        }
+
+        haptic();
+      });
+    });
+
+    // выбрать план
+    selectBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      selectedPlanId = planId;
+
+      // подсветка выбранной карточки + кнопки
+      view.querySelectorAll(".vip-cardx").forEach(c => c.classList.remove("selected"));
+      card.classList.add("selected");
+
+      view.querySelectorAll(".vip-select-btn").forEach(b => b.classList.remove("selected"));
+      selectBtn.classList.add("selected");
+
+      const months = selectedMonthsByPlan[planId];
+      const price = calcVipPrice(plan, months);
+
+      // отправляем в бота (потом привяжем оплату)
+      const payload = {
+        type: "vip",
+        plan_id: planId,
+        plan_name: plan.name,
+        months,
+        price_usdt: price
+      };
+
+      tg.sendData(JSON.stringify(payload));
+      haptic();
+      tg.showAlert(`Выбран: ${plan.name} • ${months} мес • ${price.toFixed(2)} USDT`);
+    });
+
+    // кликом по карточке тоже выбираем (удобно)
+    card.addEventListener("click", (e) => {
+      // если клик по кнопке/чипам — не дублируем
+      if (e.target.closest(".vip-chip") || e.target.closest("[data-select]")) return;
+      selectBtn.click();
+    });
+  });
+
+  document.getElementById("vipBack").onclick = () => navigate("catalog");
+}
