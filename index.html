@@ -9,8 +9,7 @@
 </head>
 <body>
   <div class="app">
-
-    <!-- HEADER -->
+    <!-- ХЕДЕР -->
     <header class="top-bar">
       <div class="header-inner">
         <div id="menuToggle">
@@ -20,58 +19,27 @@
       </div>
     </header>
 
-    <!-- BACKDROP -->
+    <!-- ФОН ПОД БОКОВЫМ МЕНЮ -->
     <div id="sideMenuBackdrop"></div>
 
-    <!-- SIDE MENU -->
+    <!-- БОКОВОЕ МЕНЮ -->
     <nav id="sideMenu">
-      <button class="side-menu-btn" data-nav="catalog">Каталог</button>
-      <button class="side-menu-btn" data-nav="vip">VIP статус</button>
       <button class="side-menu-btn" data-nav="promo">Промокоды</button>
-     <button class="side-menu-btn" id="menuAbout">О магазине</button>
-
+      <button class="side-menu-btn" data-nav="catalog">Каталог</button>
+      <button class="side-menu-btn" data-nav="vip">VIP статусы</button>
+      <button class="side-menu-btn" data-nav="about">О магазине</button>
     </nav>
 
-    <!-- CONTENT -->
+    <!-- КОНТЕНТ -->
     <main id="view"></main>
 
-    <!-- BOTTOM BAR -->
+    <!-- НИЖНЯЯ ПАНЕЛЬ (только для каталога) -->
     <footer class="bottom-bar">
       <div class="total-text">Итого: <span id="total">0.00</span> USDT</div>
       <button id="checkout">Оформить заказ</button>
     </footer>
-
   </div>
 
   <script src="script.js"></script>
 </body>
 </html>
-<div class="about-page">
-  <h2>COSMO SHOP</h2>
-
-  <p>
-    COSMO SHOP — это цифровой магазин нового формата внутри Telegram.
-    Мы объединяем удобный интерфейс, автоматизацию и современный подход
-    к покупке цифровых товаров.
-  </p>
-
-  <p>
-    В магазине доступны цифровые товары, VIP-статусы и специальные предложения.
-    Все заказы оформляются напрямую через Telegram WebApp — быстро и без лишних шагов.
-  </p>
-
-  <p>
-    Оплата принимается в криптовалюте (USDT).  
-    Мы не используем посредников — переводы отправляются напрямую
-    на указанные адреса.
-  </p>
-
-  <p>
-    Магазин находится в активной разработке.
-    Функционал и возможности будут постепенно расширяться.
-  </p>
-
-  <p class="about-footer">
-    © COSMO SHOP
-  </p>
-</div>

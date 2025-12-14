@@ -1,440 +1,445 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const tg = window.Telegram?.WebApp;
-  if (tg) {
-    tg.ready();
-    tg.expand();
-  } else {
-    alert("Открой магазин через кнопку в боте");
-    return;
-  }
+/* === ГЛОБАЛЬНО === */
+* { box-sizing: border-box; }
 
-  // ====== DOM ======
-  const view = document.getElementById("view");
-  const totalEl = document.getElementById("total");
-  const checkoutBtn = document.getElementById("checkout");
-
-  // ====== MENU ======
-  const menuToggle = document.getElementById("menuToggle");
-  const sideMenu = document.getElementById("sideMenu");
-  const sideMenuBackdrop = document.getElementById("sideMenuBackdrop");
-
-  function openMenu() {
-    sideMenu?.classList.add("open");
-    sideMenuBackdrop?.classList.add("visible");
-  }
-  function closeMenu() {
-    sideMenu?.classList.remove("open");
-    sideMenuBackdrop?.classList.remove("visible");
-  }
-
-  menuToggle?.addEventListener("click", () => {
-    const isOpen = sideMenu?.classList.contains("open");
-    isOpen ? closeMenu() : openMenu();
-  });
-  sideMenuBackdrop?.addEventListener("click", closeMenu);
-
-  // ====== NAV ======
-  function navigate(where) {
-    closeMenu();
-    if (where === "catalog") renderCatalog();
-    if (where === "vip") renderVip();
-    if (where === "promo") renderPromo();
-    if (where === "about") renderAbout();
-  }
-
-  // привязка кнопок меню по data-nav
-  document.querySelectorAll("#sideMenu .side-menu-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const nav = btn.getAttribute("data-nav");
-      if (nav) navigate(nav);
-    });
-  });
-
-  // Telegram back button (закрыть меню, иначе на каталог)
-  tg.onEvent("backButtonClicked", () => {
-    if (sideMenu?.classList.contains("open")) closeMenu();
-    else navigate("catalog");
-  });
-
-  // ====== CATALOG (пока заглушка) ======
-  function renderCatalog() {
-    tg.BackButton.hide();
-    if (checkoutBtn) checkoutBtn.style.display = "";
-    if (totalEl) totalEl.textContent = "0.00";
-
-    view.innerHTML = `
-      <div class="vip-page">
-        <div class="vip-title">Каталог</div>
-        <div style="opacity:.85;line-height:1.6;text-align:center">
-          Здесь будет каталог товаров.<br/>
-          Сейчас мы доделываем меню + VIP.
-        </div>
-      </div>
-    `;
-  }
-
-  // ====== PROMO (заглушка) ======
-  function renderPromo() {
-    tg.BackButton.show();
-    if (checkoutBtn) checkoutBtn.style.display = "none";
-
-    view.innerHTML = `
-      <div class="vip-page">
-        <div class="vip-title">Промокоды</div>
-        <div style="opacity:.85;line-height:1.6;text-align:center">
-          Раздел в разработке.
-        </div>
-        <div style="margin-top:14px; text-align:center;">
-          <button class="detail-add-btn" id="goBackPromo">Назад</button>
-        </div>
-      </div>
-    `;
-    document.getElementById("goBackPromo").onclick = () => navigate("catalog");
-  }
-
-  // ====== ABOUT ======
- function renderAbout() {
-  tg.BackButton.show();
-  if (checkoutBtn) checkoutBtn.style.display = "none";
-
-  view.innerHTML = `
-    <div class="about-page">
-      <h2>COSMO SHOP</h2>
-
-      <p>
-        COSMO SHOP — это цифровой магазин нового формата внутри Telegram.
-        Мы объединяем удобный интерфейс, автоматизацию и современный подход
-        к покупке цифровых товаров.
-      </p>
-
-      <p>
-        В магазине доступны цифровые товары, VIP-статусы и специальные предложения.
-        Все заказы оформляются напрямую через Telegram WebApp — быстро и без лишних шагов.
-      </p>
-
-      <p>
-        Оплата принимается в криптовалюте (USDT).
-        Переводы отправляются напрямую — без посредников.
-      </p>
-
-      <p>
-        Магазин находится в активной разработке.
-        Функционал и возможности будут расширяться.
-      </p>
-
-      <div style="margin-top:14px;text-align:center;">
-        <button class="detail-add-btn" id="aboutBackBtn">Назад</button>
-      </div>
-
-      <p class="about-footer">© COSMO SHOP</p>
-    </div>
-  `;
-
-  document.getElementById("aboutBackBtn").onclick = () => navigate("catalog");
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #fff; background: #0c0c0c;
 }
 
-  // ====== VIP DATA ======
-  const vipTiers = [
-    {
-      key: "bronze",
-      title: "Bronze VIP",
-      basePricePerMonth: 10,
-      desc: "Стартовый VIP уровень для уверенного начала.",
-      benefits: ["VIP товары", "Базовые скидки", "Ранний доступ"]
-    },
-    {
-      key: "silver",
-      title: "Silver VIP",
-      basePricePerMonth: 20,
-      desc: "Больше выгод и приоритет в обслуживании.",
-      benefits: ["Все из Bronze", "Выше скидки", "Приоритет поддержки"]
-    },
-    {
-      key: "gold",
-      title: "Gold VIP",
-      basePricePerMonth: 35,
-      desc: "Премиальный уровень с максимальной выгодой.",
-      benefits: ["Все из Silver", "Эксклюзивные позиции", "Персональные офферы"]
-    },
-    {
-      key: "diamond",
-      title: "Diamond VIP",
-      basePricePerMonth: 60,
-      desc: "Максимальный доступ: закрытый раздел и лучшие условия.",
-      benefits: ["Макс. скидки", "Закрытый контент", "Личный приоритет", "Подарки/бонусы"]
-    }
-  ];
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background-image: url("img/background.webp");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.18;
+  filter: blur(18px);
+  transform: scale(1.1);
+  z-index: -1;
+}
 
-  const vipPeriods = [1, 3, 6, 12];
-  let selectedVip = null;
+/* === ПРИЛОЖЕНИЕ === */
+.app {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding-bottom: 150px;
+}
 
-  function calcVipPrice(base, months) {
-    // мягкая скидка за длительность (чтобы выглядело “богаче”)
-    let k = 1;
-    if (months === 3) k = 0.97;
-    if (months === 6) k = 0.93;
-    if (months === 12) k = 0.88;
-    return +(base * months * k).toFixed(2);
-  }
+/* === ХЕДЕР === */
+.top-bar {
+  position: sticky; top: 0; z-index: 150;
+  padding: 14px 18px;
+  background: rgba(0, 0, 0, 0.9);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.header-inner {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.shop-title {
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  text-align: center;
+  text-shadow: 0 0 8px #000, 0 0 14px #000;
+}
 
-  // ====== Inject “anti-glare” CSS overrides (чтобы не править style.css) ======
-  function ensureVipSoftCssOnce() {
-    if (document.getElementById("vip-soft-overrides")) return;
+/* === БУРГЕР === */
+#menuToggle {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  z-index: 200;
+}
+#menuToggle span {
+  display: block;
+  width: 100%;
+  height: 3px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 0 8px rgba(255,255,255,0.9);
+}
 
-    const style = document.createElement("style");
-    style.id = "vip-soft-overrides";
-    style.textContent = `
-      /* --- VIP: убираем яркие переливы/шиммеры --- */
-      .vip-crown::before,
-      .vip-card .vip-anim::before,
-      .vip-hero::before,
-      .vip-hero::after {
-        animation: none !important;
-        opacity: 0 !important;
-      }
+/* === BACKDROP === */
+#sideMenuBackdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 180;
+}
+#sideMenuBackdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
 
-      /* --- VIP: делаем спокойное “дыхание” --- */
-      .vip-aura {
-        animation: vipSoftBreath 5.2s ease-in-out infinite !important;
-        opacity: .18 !important;
-        filter: blur(26px) !important;
-      }
-      .vip-aura.diamond {
-        animation-duration: 4.4s !important;
-        opacity: .22 !important;
-      }
-      @keyframes vipSoftBreath {
-        0%, 100% { transform: scale(1.00); }
-        50% { transform: scale(1.05); }
-      }
+/* === SIDE MENU === */
+#sideMenu {
+  position: fixed; top: 0; left: -70%;
+  width: 70%; max-width: 300px; height: 100%;
+  background: radial-gradient(circle at top, rgba(255,255,255,0.08), rgba(0,0,0,0.96) 55%);
+  backdrop-filter: blur(18px);
+  padding: 24px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: left 0.26s ease-out;
+  box-shadow: 10px 0 26px rgba(0,0,0,0.9);
+  z-index: 190;
+}
+#sideMenu.open { left: 0; }
 
-      /* --- VIP: частицы (не режут глаз) --- */
-      .vip-particles {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        opacity: .35;
-        background-image:
-          radial-gradient(circle, rgba(255,255,255,.22) 0 1px, transparent 2px),
-          radial-gradient(circle, rgba(255,255,255,.14) 0 1px, transparent 2px);
-        background-size: 26px 26px, 42px 42px;
-        animation: vipParticlesDrift 8s ease-in-out infinite;
-      }
-      @keyframes vipParticlesDrift {
-        0% { transform: translate3d(-1%, -1%, 0); }
-        50% { transform: translate3d(1%, 1%, 0); }
-        100% { transform: translate3d(-1%, -1%, 0); }
-      }
+.side-menu-btn {
+  padding: 12px 16px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #ffb800, #ffe58a);
+  color: #201300;
+  font-weight: 700;
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 8px 22px rgba(0,0,0,0.85);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+.side-menu-btn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.14), 0 12px 26px rgba(0,0,0,0.95);
+}
+.side-menu-btn:active { transform: translateY(1px) scale(0.97); }
 
-      /* --- VIP: горизонтальный “snap” + подсказка --- */
-      .vip-head {
-        display:flex;
-        align-items:flex-end;
-        justify-content:space-between;
-        gap:10px;
-        margin-bottom:10px;
-      }
-      .vip-hint {
-        font-size: 12px;
-        opacity: .70;
-        user-select: none;
-        white-space: nowrap;
-      }
-      .vip-row-snap {
-        scroll-snap-type: x mandatory;
-      }
-      .vip-row-snap .vip-card {
-        scroll-snap-align: start;
-      }
-    `;
-    document.head.appendChild(style);
-  }
+/* === КАТАЛОГ === */
+.product-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  padding: 14px;
+}
+.product-card {
+  position: relative;
+  background: rgba(0,0,0,0.55);
+  border-radius: 16px;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.7);
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  transform-origin: center center;
+}
+.product-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 16px 30px rgba(0,0,0,0.95), 0 0 18px rgba(255,184,0,0.45);
+  border-color: rgba(255,219,120,0.7);
+}
+.product-card:active {
+  transform: translateY(-1px) scale(0.99);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.85);
+}
+.product-thumb {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.28s ease;
+}
+.product-card:hover .product-thumb {
+  transform: scale(1.07) translateY(-2px);
+}
+.product-info { padding: 10px; }
+.product-name { font-weight: 700; margin: 0 0 4px; font-size: 15px; }
+.product-desc { font-size: 12px; opacity: 0.78; margin-bottom: 6px; }
 
-  // ====== CROWNS (разные “богатые” иконки без яркого блеска) ======
-  function crownSvg(key) {
-    // простые SVG, без анимации
-    if (key === "bronze") {
-      return `<svg viewBox="0 0 24 24" fill="none"><path d="M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6 18l2-8 4 5 4-5 2 8" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`;
-    }
-    if (key === "silver") {
-      return `<svg viewBox="0 0 24 24" fill="none"><path d="M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5.5 18l2-10 4.5 6 4.5-6 2 10" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7.5" cy="8.2" r="1.3" fill="currentColor"/><circle cx="16.5" cy="8.2" r="1.3" fill="currentColor"/></svg>`;
-    }
-    if (key === "gold") {
-      return `<svg viewBox="0 0 24 24" fill="none"><path d="M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 18l2-10 5 6 5-6 2 10" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7" cy="8" r="1.4" fill="currentColor"/><circle cx="12" cy="13" r="1.4" fill="currentColor"/><circle cx="17" cy="8" r="1.4" fill="currentColor"/></svg>`;
-    }
-    // diamond
-    return `<svg viewBox="0 0 24 24" fill="none"><path d="M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 18l2-11 5 7 5-7 2 11" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 7l4 6 4-6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13.2" r="1.6" fill="currentColor"/></svg>`;
-  }
+.product-price-row, .detail-price-row, .cart-price {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.old-price { opacity: 0.6; text-decoration: line-through; font-size: 13px; }
+.new-price { color: #ffdd55; font-weight: 700; font-size: 15px; }
 
-  // ====== VIP VIEW (горизонтально, все статусы видно) ======
-  function renderVip() {
-    ensureVipSoftCssOnce();
+/* qty */
+.product-controls, .detail-qty-row, .cart-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.qty-btn {
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.45), inset 0 0 4px rgba(255,255,255,0.06);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+.qty-btn:hover { background: rgba(255,255,255,0.24); transform: translateY(-1px); }
+.qty-btn:active { transform: translateY(1px) scale(0.95); }
+.quantity { font-size: 14px; font-weight: 600; }
 
-    tg.BackButton.show();
-    if (checkoutBtn) checkoutBtn.style.display = "none";
+/* === DETAIL === */
+.product-detail { padding: 14px; }
+.detail-slider { position: relative; margin-bottom: 12px; }
+.detail-image {
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.7);
+}
+.slider-btn {
+  position: absolute; top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.75);
+  border: 1px solid rgba(255,255,255,0.28);
+  color: #fff;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  font-size: 22px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+}
+.slider-btn.left { left: 10px; }
+.slider-btn.right { right: 10px; }
 
-    // по умолчанию сбрасываем выбор при каждом заходе (можно позже хранить)
-    selectedVip = null;
+.product-detail-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 14px 0 8px;
+  text-align: center;
+}
+.product-detail-short {
+  margin-top: 10px;
+  font-size: 14px;
+  opacity: 0.9;
+  cursor: pointer;
+}
+.product-detail-full {
+  font-size: 13px;
+  opacity: 0.85;
+  line-height: 1.5;
+  margin-top: 4px;
+  display: none;
+}
+.product-detail-full.visible { display: block; }
 
-    view.innerHTML = `
-      <div class="vip-page">
-        <div class="vip-head">
-          <div class="vip-title" style="margin:0;">VIP СТАТУСЫ</div>
-          <div class="vip-hint">Листай →</div>
-        </div>
+/* === CART === */
+.cart-list { display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
+.cart-card {
+  background: rgba(0,0,0,0.55);
+  border-radius: 16px;
+  display: flex;
+  padding: 10px;
+  gap: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.7);
+}
+.cart-thumb { width: 110px; height: 110px; border-radius: 12px; object-fit: cover; }
+.cart-info h2 { margin: 0 0 6px; font-size: 16px; }
+.empty-cart { text-align: center; opacity: 0.7; margin-top: 12px; }
+.cart-total { margin-top: 16px; font-size: 18px; font-weight: 700; text-align: center; }
 
-        <div class="vip-row vip-row-snap" id="vipRow">
-          ${vipTiers
-            .map((v) => {
-              const defaultMonths = 1;
-              const price = calcVipPrice(v.basePricePerMonth, defaultMonths);
+/* === BUTTONS === */
+.detail-add-btn, #checkout {
+  background: linear-gradient(135deg, #ffb800, #ffe58a);
+  padding: 12px 24px;
+  border-radius: 999px;
+  border: none;
+  font-weight: 700;
+  color: #201300;
+  font-size: 16px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 10px 24px rgba(0,0,0,0.8);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+.detail-add-btn:hover, #checkout:hover {
+  filter: brightness(1.04);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 14px 30px rgba(0,0,0,0.9);
+  transform: translateY(-1px);
+}
+.detail-add-btn::after, #checkout::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 0 0, rgba(255,255,255,0.55), transparent 60%);
+  opacity: 0;
+  transform: translateX(-40%);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.detail-add-btn:hover::after, #checkout:hover::after {
+  opacity: 1;
+  transform: translateX(40%);
+}
+.detail-add-btn:active, #checkout:active { transform: translateY(1px) scale(0.97); }
 
-              return `
-                <div class="vip-card vip-${v.key}" data-key="${v.key}">
-                  <div class="vip-check">✓</div>
+/* === BOTTOM BAR === */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  padding: 12px 16px;
+  background: rgba(0,0,0,0.78);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 -8px 18px rgba(0,0,0,0.85);
+}
+.total-text { font-size: 15px; opacity: 0.9; }
 
-                  <div class="vip-rank">
-                    <div class="vip-badge">${v.title}</div>
-                    <div class="vip-crown" style="position:relative; color:#fff;">
-                      ${crownSvg(v.key)}
-                    </div>
-                  </div>
+/* ===== VIP minimal helpers (под наш script) ===== */
+.vip-page { padding: 14px; }
+.vip-title {
+  text-align:center;
+  font-size: 22px;
+  font-weight: 900;
+  margin: 12px 0 14px;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(0,0,0,0.85);
+}
 
-                  <div class="vip-hero ${v.key}" style="position:relative;">
-                    <div class="vip-particles"></div>
-                    <div class="vip-aura ${v.key === "diamond" ? "diamond" : ""} ${v.key}"></div>
-                  </div>
+.vip-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:10px;}
+.vip-hint{font-size:12px;opacity:.70;user-select:none;white-space:nowrap; animation: vipHintFade 4.5s ease-in-out infinite;}
+@keyframes vipHintFade { 0%,100%{opacity:.55} 50%{opacity:.85} }
 
-                  <div class="vip-name">${v.title}</div>
-                  <div class="vip-desc">${v.desc}</div>
+.vip-row { display:flex; gap:14px; overflow-x:auto; padding-bottom:10px; }
+.vip-row::-webkit-scrollbar{height:8px;}
+.vip-row::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:999px;}
+.vip-row-snap{scroll-snap-type:x mandatory;}
+.vip-row-snap .vip-card{scroll-snap-align:start;}
 
-                  <ul class="vip-benefits">
-                    ${v.benefits.map((b) => `<li>${b}</li>`).join("")}
-                  </ul>
+.vip-card{
+  min-width: 275px;
+  flex:0 0 auto;
+  background: rgba(0,0,0,0.55);
+  border-radius: 18px;
+  padding: 14px;
+  position: relative;
+  overflow:hidden;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.85);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.vip-card.selected{
+  border-color: rgba(255,219,120,0.95);
+  box-shadow: 0 22px 40px rgba(0,0,0,1), 0 0 34px rgba(255,200,80,0.55);
+}
+.vip-check{
+  position:absolute; top:12px; right:12px;
+  width:34px; height:34px; border-radius:50%;
+  background: rgba(0,0,0,0.65);
+  border:1px solid rgba(255,255,255,0.25);
+  display:grid; place-items:center;
+  font-weight:950;
+  opacity:0; transform:scale(.85);
+  transition:.18s ease;
+}
+.vip-card.selected .vip-check{opacity:1; transform:scale(1);}
 
-                  <div class="vip-price-row">
-                    <div>
-                      <div class="vip-sub">Цена:</div>
-                      <div class="vip-price" data-price>${price} USDT</div>
-                    </div>
-                    <div class="vip-sub" style="text-align:right">
-                      Период: <b data-period-label>${defaultMonths} мес.</b>
-                    </div>
-                  </div>
+.vip-rank{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+.vip-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 12px;border-radius:999px;
+  font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.35);
+  box-shadow: inset 0 0 12px rgba(0,0,0,0.55);
+}
+.vip-crown{
+  width:34px;height:34px;border-radius:12px;
+  display:grid;place-items:center;
+  border:1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.35);
+}
+.vip-crown svg{width:20px;height:20px;}
 
-                  <select class="vip-select" data-period>
-                    ${vipPeriods.map((m) => `<option value="${m}">${m} мес.</option>`).join("")}
-                  </select>
+.vip-hero{height:135px;border-radius:16px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.15); box-shadow: inset 0 0 26px rgba(0,0,0,0.55);}
+.vip-particles{
+  position:absolute; inset:0; pointer-events:none; opacity:.35;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,.22) 0 1px, transparent 2px),
+    radial-gradient(circle, rgba(255,255,255,.14) 0 1px, transparent 2px);
+  background-size: 26px 26px, 42px 42px;
+  animation: vipParticlesDrift 8s ease-in-out infinite;
+}
+@keyframes vipParticlesDrift{
+  0%{transform:translate3d(-1%,-1%,0)}
+  50%{transform:translate3d(1%,1%,0)}
+  100%{transform:translate3d(-1%,-1%,0)}
+}
+.vip-aura{
+  position:absolute; inset:-40%;
+  filter: blur(26px);
+  opacity: .18;
+  transform: scale(1);
+  animation: vipSoftBreath 5.2s ease-in-out infinite;
+  pointer-events:none;
+}
+.vip-aura.diamond{opacity:.22; animation-duration:4.4s;}
+@keyframes vipSoftBreath{0%,100%{transform:scale(1)} 50%{transform:scale(1.05)}}
 
-                  <button class="detail-add-btn vip-choose-btn" data-choose>Выбрать</button>
-                </div>
-              `;
-            })
-            .join("")}
-        </div>
+.vip-name{margin:12px 0 6px;font-size:17px;font-weight:950;}
+.vip-desc{font-size:13px;opacity:.86;line-height:1.5;}
+.vip-benefits{margin:10px 0 0;padding-left:18px;}
+.vip-benefits li{font-size:13px;margin:6px 0;opacity:.92;}
 
-        <div style="margin-top:14px;">
-          <button id="vipPayBtn" class="detail-add-btn" disabled style="opacity:.6;cursor:not-allowed;width:100%;">
-            Перейти к оплате
-          </button>
-          <div style="margin-top:10px;text-align:center;">
-            <button class="detail-add-btn" id="vipBackBtn">Назад</button>
-          </div>
-        </div>
-      </div>
-    `;
+.vip-price-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.10);}
+.vip-price{font-weight:950;font-size:18px;letter-spacing:.03em;}
+.vip-sub{font-size:12px;opacity:.75;}
 
-    const cards = Array.from(view.querySelectorAll(".vip-card"));
-// ===== AUTO-HINT (soft, always on) =====
-const vipRow = document.getElementById("vipRow");
-let hintDir = 1;
+.vip-select{
+  width:100%;
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.20);
+  background: rgba(0,0,0,0.50);
+  color:#fff;
+}
 
-setInterval(() => {
-  if (!vipRow) return;
+.vip-hero.bronze { background: radial-gradient(circle at top, rgba(205,127,50,0.40), rgba(0,0,0,0.75) 62%); }
+.vip-hero.silver { background: radial-gradient(circle at top, rgba(210,210,210,0.35), rgba(0,0,0,0.75) 62%); }
+.vip-hero.gold   { background: radial-gradient(circle at top, rgba(255,215,0,0.33), rgba(0,0,0,0.75) 62%); }
+.vip-hero.diamond{ background: radial-gradient(circle at top, rgba(120,220,255,0.38), rgba(0,0,0,0.80) 65%); }
 
-  // если пользователь сейчас скроллит — не мешаем
-  if (vipRow.matches(":active")) return;
+.vip-aura.bronze { background: radial-gradient(circle, rgba(205,127,50,0.55), transparent 60%); }
+.vip-aura.silver { background: radial-gradient(circle, rgba(210,210,210,0.50), transparent 60%); }
+.vip-aura.gold   { background: radial-gradient(circle, rgba(255,215,0,0.50), transparent 60%); }
+.vip-aura.diamond{ background: radial-gradient(circle, rgba(120,220,255,0.60), transparent 60%); }
 
-  vipRow.classList.add("vip-hint-animate");
-
-  // лёгкий визуальный сдвиг
-  vipRow.scrollBy({
-    left: 12 * hintDir,
-    behavior: "smooth"
-  });
-
-  hintDir *= -1;
-
-  setTimeout(() => {
-    vipRow.classList.remove("vip-hint-animate");
-  }, 900);
-}, 6500);
-    const payBtn = document.getElementById("vipPayBtn");
-
-    function setPayEnabled(enabled) {
-      payBtn.disabled = !enabled;
-      payBtn.style.opacity = enabled ? "1" : "0.6";
-      payBtn.style.cursor = enabled ? "pointer" : "not-allowed";
-    }
-
-    cards.forEach((card) => {
-      const key = card.dataset.key;
-      const tier = vipTiers.find((x) => x.key === key);
-
-      const periodSelect = card.querySelector("[data-period]");
-      const priceEl = card.querySelector("[data-price]");
-      const periodLabel = card.querySelector("[data-period-label]");
-      const chooseBtn = card.querySelector("[data-choose]");
-
-      periodSelect.addEventListener("change", () => {
-        const months = +periodSelect.value;
-        const price = calcVipPrice(tier.basePricePerMonth, months);
-        priceEl.textContent = `${price} USDT`;
-        periodLabel.textContent = `${months} мес.`;
-
-        // если выбран этот VIP — обновляем выбранное
-        if (selectedVip?.key === key) {
-          selectedVip = { key, months, price };
-        }
-      });
-
-      chooseBtn.addEventListener("click", () => {
-        cards.forEach((c) => c.classList.remove("selected"));
-        card.classList.add("selected");
-
-        const months = +periodSelect.value;
-        const price = calcVipPrice(tier.basePricePerMonth, months);
-        selectedVip = { key, months, price };
-
-        setPayEnabled(true);
-
-        // мягкая подсказка “выбрано”
-        tg.hapticFeedback?.impactOccurred?.("light");
-      });
-    });
-
-    payBtn.addEventListener("click", () => {
-      if (!selectedVip) return;
-
-      tg.showAlert(
-        `VIP: ${selectedVip.key.toUpperCase()}\n` +
-        `Период: ${selectedVip.months} мес.\n` +
-        `Цена: ${selectedVip.price} USDT\n\n` +
-        `Оплату подключим позже.`
-      );
-    });
-
-    document.getElementById("vipBackBtn").onclick = () => navigate("catalog");
-  }
-
-  // ====== CHECKOUT (пока просто сигнал, чтобы не мешал) ======
-  checkoutBtn.onclick = () => {
-    tg.showAlert("Каталог и корзину доделаем на следующем этапе.");
-  };
-
-  // ====== START ======
-  navigate("catalog");
-
-  // expose navigate if нужно дергать из консоли
-  window.__navigate = navigate;
-});
+/* === ABOUT PAGE === */
+.about-page { padding: 16px; line-height: 1.6; }
+.about-page h2 {
+  text-align:center;
+  margin: 10px 0 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.about-page p { font-size: 14px; opacity: 0.9; margin-bottom: 10px; }
+.about-footer { text-align:center; margin-top: 18px; opacity: 0.6; font-size: 12px; }
