@@ -93,24 +93,45 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ====== ABOUT ======
-  function renderAbout() {
-    tg.BackButton.show();
-    if (checkoutBtn) checkoutBtn.style.display = "none";
+ function renderAbout() {
+  tg.BackButton.show();
+  if (checkoutBtn) checkoutBtn.style.display = "none";
 
-    view.innerHTML = `
-      <div class="vip-page">
-        <div class="vip-title">О магазине</div>
-        <div style="opacity:.88;line-height:1.6">
-          COSMO SHOP — цифровой магазин. VIP статусы дают дополнительные преимущества,
-          скидки и доступ к закрытым позициям.
-        </div>
-        <div style="margin-top:14px; text-align:center;">
-          <button class="detail-add-btn" id="goBackAbout">Назад</button>
-        </div>
+  view.innerHTML = `
+    <div class="about-page">
+      <h2>COSMO SHOP</h2>
+
+      <p>
+        COSMO SHOP — это цифровой магазин нового формата внутри Telegram.
+        Мы объединяем удобный интерфейс, автоматизацию и современный подход
+        к покупке цифровых товаров.
+      </p>
+
+      <p>
+        В магазине доступны цифровые товары, VIP-статусы и специальные предложения.
+        Все заказы оформляются напрямую через Telegram WebApp — быстро и без лишних шагов.
+      </p>
+
+      <p>
+        Оплата принимается в криптовалюте (USDT).
+        Переводы отправляются напрямую — без посредников.
+      </p>
+
+      <p>
+        Магазин находится в активной разработке.
+        Функционал и возможности будут расширяться.
+      </p>
+
+      <div style="margin-top:14px;text-align:center;">
+        <button class="detail-add-btn" id="aboutBackBtn">Назад</button>
       </div>
-    `;
-    document.getElementById("goBackAbout").onclick = () => navigate("catalog");
-  }
+
+      <p class="about-footer">© COSMO SHOP</p>
+    </div>
+  `;
+
+  document.getElementById("aboutBackBtn").onclick = () => navigate("catalog");
+}
 
   // ====== VIP DATA ======
   const vipTiers = [

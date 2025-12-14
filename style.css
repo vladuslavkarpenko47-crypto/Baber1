@@ -406,3 +406,9 @@ body::before {
   opacity: 0.6;
   font-size: 12px;
 }
+document.querySelectorAll("#sideMenu .side-menu-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const nav = btn.getAttribute("data-nav");
+    if (nav) navigate(nav);
+  });
+});
