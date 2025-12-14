@@ -87,3 +87,35 @@
   0%, 100% { transform: rotate(90deg) translateX(0); opacity: 0.7; }
   50%      { transform: rotate(90deg) translateX(4px); opacity: 1; }
 }
+/* === чтобы фото НЕ были огромными и сетка 2x была ровной === */
+.product-thumb {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+}
+
+/* === стрелка для раскрытия описания (двигается постоянно) === */
+.product-detail-short {
+  position: relative;
+  padding-right: 22px;
+}
+
+.desc-arrow {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: inline-block;
+  opacity: 0.85;
+  transform: rotate(90deg);
+  animation: arrowWiggle 1.4s ease-in-out infinite;
+}
+
+.product-detail-short.open .desc-arrow {
+  transform: rotate(270deg);
+}
+
+@keyframes arrowWiggle {
+  0%, 100% { transform: rotate(90deg) translateX(0); opacity: 0.7; }
+  50%      { transform: rotate(90deg) translateX(4px); opacity: 1; }
+}
