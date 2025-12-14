@@ -9,20 +9,17 @@
 </head>
 <body>
   <div class="app">
-    <!-- ХЕДЕР -->
     <header class="top-bar">
       <div class="header-inner">
-        <div id="menuToggle">
+        <div id="menuToggle" role="button" aria-label="Menu">
           <span></span><span></span><span></span>
         </div>
         <div class="shop-title">COSMO SHOP</div>
       </div>
     </header>
 
-    <!-- ФОН ПОД БОКОВЫМ МЕНЮ -->
     <div id="sideMenuBackdrop"></div>
 
-    <!-- БОКОВОЕ МЕНЮ -->
     <nav id="sideMenu">
       <button class="side-menu-btn" data-nav="promo">Промокоды</button>
       <button class="side-menu-btn" data-nav="catalog">Каталог</button>
@@ -30,10 +27,8 @@
       <button class="side-menu-btn" data-nav="about">О магазине</button>
     </nav>
 
-    <!-- КОНТЕНТ -->
     <main id="view"></main>
 
-    <!-- НИЖНЯЯ ПАНЕЛЬ (только для каталога) -->
     <footer class="bottom-bar">
       <div class="total-text">Итого: <span id="total">0.00</span> USDT</div>
       <button id="checkout">Оформить заказ</button>
