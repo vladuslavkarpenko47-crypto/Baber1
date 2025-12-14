@@ -1,7 +1,7 @@
-/* === ГЛОБАЛЬНО === */
-* {
-  box-sizing: border-box;
-}
+/* =========================================================
+   GLOBAL
+========================================================= */
+* { box-sizing: border-box; }
 
 html, body {
   margin: 0;
@@ -25,7 +25,9 @@ body::before {
   z-index: -1;
 }
 
-/* === ПРИЛОЖЕНИЕ === */
+/* =========================================================
+   APP
+========================================================= */
 .app {
   width: 100%;
   max-width: 480px;
@@ -33,19 +35,20 @@ body::before {
   padding-bottom: 150px;
 }
 
-/* === ХЕДЕР === */
+/* =========================================================
+   HEADER
+========================================================= */
 .top-bar {
   position: sticky;
   top: 0;
   z-index: 150;
   padding: 14px 18px;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0,0,0,0.9);
   border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 .header-inner {
   position: relative;
-  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -55,12 +58,13 @@ body::before {
   font-size: 22px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  text-align: center;
+  letter-spacing: .15em;
   text-shadow: 0 0 8px #000, 0 0 14px #000;
 }
 
-/* === БУРГЕР-МЕНЮ (3 ПОЛОСКИ) === */
+/* =========================================================
+   BURGER MENU
+========================================================= */
 #menuToggle {
   position: absolute;
   left: 16px;
@@ -76,22 +80,19 @@ body::before {
 }
 
 #menuToggle span {
-  display: block;
-  width: 100%;
   height: 3px;
+  background: #fff;
   border-radius: 999px;
-  background: #ffffff;
-  box-shadow: 0 0 8px rgba(255,255,255,0.9);
+  box-shadow: 0 0 8px rgba(255,255,255,.9);
 }
 
-/* === ЗАТЕМНЕНИЕ ПОД МЕНЮ === */
 #sideMenuBackdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0,0,0,.45);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease;
+  transition: .25s;
   z-index: 180;
 }
 #sideMenuBackdrop.visible {
@@ -99,7 +100,6 @@ body::before {
   pointer-events: auto;
 }
 
-/* === ВЫЕЗЖАЮЩЕЕ МЕНЮ === */
 #sideMenu {
   position: fixed;
   top: 0;
@@ -107,328 +107,48 @@ body::before {
   width: 70%;
   max-width: 300px;
   height: 100%;
-  background: radial-gradient(circle at top, rgba(255,255,255,0.08), rgba(0,0,0,0.96) 55%);
+  padding: 24px 18px;
+  background: radial-gradient(circle at top, rgba(255,255,255,.08), rgba(0,0,0,.96) 55%);
   backdrop-filter: blur(18px);
-  padding: 24px 18px 18px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  transition: left 0.26s ease-out;
-  box-shadow: 10px 0 26px rgba(0,0,0,0.9);
+  transition: left .26s ease;
   z-index: 190;
 }
-#sideMenu.open {
-  left: 0;
-}
+#sideMenu.open { left: 0; }
 
 .side-menu-btn {
   padding: 12px 16px;
   border-radius: 999px;
   border: none;
-  background: linear-gradient(135deg, #ffb800, #ffe58a);
+  background: linear-gradient(135deg,#ffb800,#ffe58a);
   color: #201300;
   font-weight: 700;
-  font-size: 15px;
-  text-align: left;
   cursor: pointer;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.08),
-    0 8px 22px rgba(0,0,0,0.85);
-  transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease,
-    filter 0.12s ease;
-}
-.side-menu-btn:hover {
-  filter: brightness(1.06);
-  transform: translateY(-1px);
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.14),
-    0 12px 26px rgba(0,0,0,0.95);
-}
-.side-menu-btn:active {
-  transform: translateY(1px) scale(0.97);
+  box-shadow: 0 8px 22px rgba(0,0,0,.85);
 }
 
-/* === СПИСОК ТОВАРОВ === */
-.product-list {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-  padding: 14px;
-}
-
-/* КАРТОЧКА ТОВАРА С ПАРАЛЛАКСОМ И GLOW */
-.product-card {
-  position: relative;
-  background: rgba(0,0,0,0.55);
-  border-radius: 16px;
-  overflow: hidden;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.7);
-  cursor: pointer;
-  border: 1px solid rgba(255,255,255,0.08);
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    border-color 0.18s ease;
-  transform-origin: center center;
-}
-.product-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow:
-    0 16px 30px rgba(0,0,0,0.95),
-    0 0 18px rgba(255,184,0,0.45);
-  border-color: rgba(255,219,120,0.7);
-}
-.product-card:active {
-  transform: translateY(-1px) scale(0.99);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.85);
-}
-
-/* картинка с мягким зумом */
-.product-thumb {
-  width: 100%;
-  height: 140px;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.28s ease;
-}
-.product-card:hover .product-thumb {
-  transform: scale(1.07) translateY(-2px);
-}
-
-.product-info {
-  padding: 10px;
-}
-
-.product-name {
-  font-weight: 700;
-  margin: 0 0 4px;
-  font-size: 15px;
-}
-.product-desc {
-  font-size: 12px;
-  opacity: 0.78;
-  margin-bottom: 6px;
-}
-
-/* Цены */
-.product-price-row,
-.detail-price-row,
-.cart-price {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.old-price {
-  opacity: 0.6;
-  text-decoration: line-through;
-  font-size: 13px;
-}
-.new-price {
-  color: #ffdd55;
-  font-weight: 700;
-  font-size: 15px;
-}
-
-/* Количество */
-.product-controls,
-.detail-qty-row,
-.cart-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 8px;
-}
-.qty-btn {
-  width: 32px;
-  height: 32px;
-  background: rgba(255,255,255,0.14);
-  border: 1px solid rgba(255,255,255,0.22);
-  border-radius: 10px;
-  color: #fff;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow:
-    0 2px 6px rgba(0,0,0,0.45),
-    inset 0 0 4px rgba(255,255,255,0.06);
-  transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease,
-    background 0.12s ease;
-}
-.qty-btn:hover {
-  background: rgba(255,255,255,0.24);
-  transform: translateY(-1px);
-}
-.qty-btn:active {
-  transform: translateY(1px) scale(0.95);
-}
-.quantity {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-/* === ДЕТАЛИ ТОВАРА === */
-.product-detail {
-  padding: 14px;
-}
-
-.detail-slider {
-  position: relative;
-  margin-bottom: 12px;
-}
-.detail-image {
-  width: 100%;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.7);
-}
-
-.slider-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0,0,0,0.75);
-  border: 1px solid rgba(255,255,255,0.28);
-  color: #fff;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  font-size: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.8);
-}
-.slider-btn.left { left: 10px; }
-.slider-btn.right { right: 10px; }
-
-.product-detail-title {
-  font-size: 20px;
-  font-weight: 700;
-  margin: 14px 0 8px;
-  text-align: center;
-}
-
-/* Описания */
-.product-detail-short {
-  margin-top: 10px;
-  font-size: 14px;
-  opacity: 0.9;
-  cursor: pointer;
-}
-.product-detail-full {
-  font-size: 13px;
-  opacity: 0.85;
-  line-height: 1.5;
-  margin-top: 4px;
-  display: none;
-}
-.product-detail-full.visible {
-  display: block;
-}
-
-/* === КОРЗИНА === */
-.cart-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-top: 10px;
-}
-.cart-card {
-  background: rgba(0,0,0,0.55);
-  border-radius: 16px;
-  display: flex;
-  padding: 10px;
-  gap: 12px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.7);
-}
-.cart-thumb {
-  width: 110px;
-  height: 110px;
-  border-radius: 12px;
-  object-fit: cover;
-}
-.cart-info h2 {
-  margin: 0 0 6px;
-  font-size: 16px;
-}
-.empty-cart {
-  text-align: center;
-  opacity: 0.7;
-  margin-top: 12px;
-}
-.cart-total {
-  margin-top: 16px;
-  font-size: 18px;
-  font-weight: 700;
-  text-align: center;
-}
-
-/* === КНОПКИ (в том числе "Оформить заказ" и "Перейти к оплате") === */
-.detail-add-btn,
-#checkout {
-  background: linear-gradient(135deg, #ffb800, #ffe58a);
+/* =========================================================
+   BUTTONS
+========================================================= */
+.detail-add-btn, #checkout {
+  background: linear-gradient(135deg,#ffb800,#ffe58a);
   padding: 12px 24px;
   border-radius: 999px;
   border: none;
   font-weight: 700;
   color: #201300;
-  font-size: 16px;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.08),
-    0 10px 24px rgba(0,0,0,0.8);
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease,
-    filter 0.12s ease;
+  box-shadow: 0 10px 24px rgba(0,0,0,.8);
+  transition: .12s;
 }
+.detail-add-btn:hover, #checkout:hover { transform: translateY(-1px); }
+.detail-add-btn:active, #checkout:active { transform: scale(.97); }
 
-.detail-add-btn:hover,
-#checkout:hover {
-  filter: brightness(1.04);
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.12),
-    0 14px 30px rgba(0,0,0,0.9);
-  transform: translateY(-1px);
-}
-
-/* блестящая подсветка */
-.detail-add-btn::after,
-#checkout::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 0 0, rgba(255,255,255,0.55), transparent 60%);
-  opacity: 0;
-  transform: translateX(-40%);
-  transition:
-    opacity 0.25s ease,
-    transform 0.25s ease;
-}
-.detail-add-btn:hover::after,
-#checkout:hover::after {
-  opacity: 1;
-  transform: translateX(40%);
-}
-
-.detail-add-btn:active,
-#checkout:active {
-  transform: translateY(1px) scale(0.97);
-}
-
-/* === НИЖНЯЯ ПАНЕЛЬ === */
+/* =========================================================
+   BOTTOM BAR
+========================================================= */
 .bottom-bar {
   position: fixed;
   bottom: 0;
@@ -437,15 +157,143 @@ body::before {
   width: 100%;
   max-width: 480px;
   padding: 12px 16px;
-  background: rgba(0,0,0,0.78);
-  border-top: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,.78);
   display: flex;
   justify-content: space-between;
   align-items: center;
   backdrop-filter: blur(10px);
-  box-shadow: 0 -8px 18px rgba(0,0,0,0.85);
 }
-.total-text {
-  font-size: 15px;
-  opacity: 0.9;
+
+/* =========================================================
+   VIP PAGE (FINAL)
+========================================================= */
+.vip-page { padding: 14px; }
+.vip-title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  margin-bottom: 14px;
+}
+
+.vip-row {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+
+.vip-card {
+  min-width: 280px;
+  scroll-snap-align: start;
+  background: rgba(0,0,0,.55);
+  border-radius: 18px;
+  padding: 14px;
+  position: relative;
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 10px 26px rgba(0,0,0,.9);
+  transition: .18s;
+}
+.vip-card:hover { transform: translateY(-4px); }
+
+.vip-card.selected {
+  border-color: #ffdd55;
+  box-shadow: 0 0 40px rgba(255,200,80,.7);
+}
+
+.vip-rank {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vip-badge {
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 900;
+  background: rgba(0,0,0,.35);
+}
+
+.vip-crown {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,.35);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.vip-crown::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,.6), transparent);
+  animation: shimmer 2s linear infinite;
+}
+@keyframes shimmer {
+  0% { transform: translateX(-60%) rotate(20deg); }
+  100% { transform: translateX(60%) rotate(20deg); }
+}
+
+.vip-hero {
+  height: 130px;
+  margin: 12px 0;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.vip-aura {
+  position: absolute;
+  inset: -40%;
+  filter: blur(22px);
+  opacity: .35;
+  animation: aura 3s infinite;
+}
+@keyframes aura {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Colors */
+.vip-bronze .vip-hero { background: radial-gradient(circle, #cd7f32, #000 70%); }
+.vip-silver .vip-hero { background: radial-gradient(circle, #cfd8dc, #000 70%); }
+.vip-gold   .vip-hero { background: radial-gradient(circle, #ffd700, #000 70%); }
+.vip-diamond .vip-hero { background: radial-gradient(circle, #7adfff, #000 70%); }
+
+.vip-name {
+  font-size: 17px;
+  font-weight: 900;
+}
+.vip-desc {
+  font-size: 13px;
+  opacity: .85;
+}
+.vip-benefits {
+  padding-left: 18px;
+  font-size: 13px;
+}
+
+.vip-check {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.6);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: .18s;
+}
+.vip-card.selected .vip-check { opacity: 1; }
+
+.vip-select {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(0,0,0,.5);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
 }
