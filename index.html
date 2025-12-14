@@ -9,6 +9,7 @@
 </head>
 <body>
   <div class="app">
+    <!-- HEADER -->
     <header class="top-bar">
       <div class="header-inner">
         <div id="menuToggle" role="button" aria-label="Menu">
@@ -18,17 +19,21 @@
       </div>
     </header>
 
+    <!-- MENU BACKDROP -->
     <div id="sideMenuBackdrop"></div>
 
+    <!-- SIDE MENU (ONLY HERE) -->
     <nav id="sideMenu">
-      <button class="side-menu-btn" data-nav="promo">Промокоды</button>
       <button class="side-menu-btn" data-nav="catalog">Каталог</button>
       <button class="side-menu-btn" data-nav="vip">VIP статусы</button>
+      <button class="side-menu-btn" data-nav="promo">Промокоды</button>
       <button class="side-menu-btn" data-nav="about">О магазине</button>
     </nav>
 
+    <!-- VIEW -->
     <main id="view"></main>
 
+    <!-- BOTTOM BAR (ONLY FOR CATALOG) -->
     <footer class="bottom-bar">
       <div class="total-text">Итого: <span id="total">0.00</span> USDT</div>
       <button id="checkout">Оформить заказ</button>

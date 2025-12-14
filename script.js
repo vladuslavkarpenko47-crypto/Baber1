@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // ✅ Preview-mode: работает и в Telegram, и в обычном браузере
+  // ✅ работает и в Telegram, и в браузере (для проверки по ссылке)
   const tg = window.Telegram?.WebApp ?? {
     ready: () => {},
     expand: () => {},
@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   tg.ready();
   tg.expand();
-  setTimeout(() => tg.expand(), 50);
+  setTimeout(() => tg.expand(), 60);
   setTimeout(() => tg.expand(), 250);
 
   const view = document.getElementById("view");
@@ -21,20 +21,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const checkoutBtn = document.getElementById("checkout");
   const bottomBar = document.querySelector(".bottom-bar");
 
+  // menu
   const menuToggle = document.getElementById("menuToggle");
   const sideMenu = document.getElementById("sideMenu");
   const sideMenuBackdrop = document.getElementById("sideMenuBackdrop");
 
-  const vipHintIntervalMs = 8000;
-  let currentView = "catalog";
-  let lastMainView = "catalog";
-
-  function setBottomBarVisible(visible) {
+  function setBottomBarVisible(v) {
     if (!bottomBar) return;
-    bottomBar.style.display = visible ? "flex" : "none";
+    bottomBar.style.display = v ? "flex" : "none";
   }
-
-  // ===== menu open/close (фикс некликабельности) =====
   function openMenu() {
     sideMenu?.classList.add("open");
     sideMenuBackdrop?.classList.add("visible");
@@ -48,35 +43,36 @@ document.addEventListener("DOMContentLoaded", () => {
   const toggleMenu = (e) => {
     e?.preventDefault?.();
     e?.stopPropagation?.();
-    const isOpen = sideMenu?.classList.contains("open");
-    isOpen ? closeMenu() : openMenu();
+    sideMenu?.classList.contains("open") ? closeMenu() : openMenu();
   };
 
   menuToggle?.addEventListener("click", toggleMenu);
   menuToggle?.addEventListener("pointerup", toggleMenu);
-
   sideMenuBackdrop?.addEventListener("click", (e) => { e.stopPropagation(); closeMenu(); });
   sideMenuBackdrop?.addEventListener("pointerup", (e) => { e.stopPropagation(); closeMenu(); });
 
-  // ===== products (12) =====
+  // state
+  let currentView = "catalog";
+  let lastMainView = "catalog";
+
+  // products
   const products = [
-    { id: 1,  name: "Neon Sticker Pack",   short: "Digital PNG pack • 120 шт",  full: "Набор неоновых стикеров для контента и сторис. PNG, прозрачный фон. Идеально для обложек, превью и оформления витрины.", priceUsdt: 6.5,  discountPercent: 15, images: ["https://picsum.photos/seed/neonpack1/1100/800","https://picsum.photos/seed/neonpack2/1100/800"] },
-    { id: 2,  name: "AI Prompt Bundle",    short: "500 промптов для моделей",   full: "Сборник промптов: портреты, стиль, свет, позы, фотореал, апскейл. Быстро поднимает качество и скорость работы.",          priceUsdt: 12,   discountPercent: 25, images: ["https://picsum.photos/seed/promptbundle1/1100/800","https://picsum.photos/seed/promptbundle2/1100/800","https://picsum.photos/seed/promptbundle3/1100/800"] },
-    { id: 3,  name: "Premium Backgrounds", short: "50 фонов 4K",                full: "Коллекция премиум-фонов под обложки, посты и оформление профиля. 4K, стиль: dark luxury / minimal / cyber.",             priceUsdt: 9,    discountPercent: 10, images: ["https://picsum.photos/seed/backgrounds1/1100/800","https://picsum.photos/seed/backgrounds2/1100/800"] },
-    { id: 4,  name: "Video Intro Template",short: "Intro 10s • MP4",            full: "Готовая короткая интро-заставка для твоих видео. Добавляешь ник/логотип и используешь. Быстро и красиво.",                 priceUsdt: 8,    discountPercent: 0,  images: ["https://picsum.photos/seed/videointro1/1100/800"] },
-    { id: 5,  name: "Model Caption Pack",  short: "200 подписей ENG/RU",        full: "Подписи для постов: tease, лайфстайл, флирт, продажи, прогрев. Быстро вставляешь и публикуешь.",                           priceUsdt: 7.5,  discountPercent: 20, images: ["https://picsum.photos/seed/captions1/1100/800","https://picsum.photos/seed/captions2/1100/800"] },
-    { id: 6,  name: "Profile Bio Set",     short: "20 био-описаний",            full: "Стильные био для профиля: серьёзно/дерзко/элитно. Можно комбинировать. Подходит под разные ниши.",                       priceUsdt: 5,    discountPercent: 0,  images: ["https://picsum.photos/seed/bioset1/1100/800"] },
-    { id: 7,  name: "Luxury Icon Pack",    short: "150 иконок • SVG/PNG",       full: "Иконки премиум-стиля для интерфейса, страниц и карточек товаров. SVG/PNG, чёткие и лёгкие.",                           priceUsdt: 11,   discountPercent: 18, images: ["https://picsum.photos/seed/iconpack1/1100/800","https://picsum.photos/seed/iconpack2/1100/800"] },
-    { id: 8,  name: "Photo Preset Pack",   short: "12 пресетов (моб/ПК)",       full: "Пресеты: мягкий свет, кино, глянец, контраст. Быстро делает картинку “дороже”.",                                       priceUsdt: 10,   discountPercent: 12, images: ["https://picsum.photos/seed/presets1/1100/800","https://picsum.photos/seed/presets2/1100/800"] },
-    { id: 9,  name: "Cover Design Kit",    short: "Обложки + исходники",        full: "Набор обложек для Telegram/соцсетей + исходники для редактирования. Готово для быстрого старта.",                        priceUsdt: 14,   discountPercent: 30, images: ["https://picsum.photos/seed/coverkit1/1100/800","https://picsum.photos/seed/coverkit2/1100/800","https://picsum.photos/seed/coverkit3/1100/800"] },
-    { id: 10, name: "Chat Script Pack",    short: "Скрипты для продаж",         full: "Готовые сообщения: прогрев, ответы на возражения, закрытие сделки. Экономит время и увеличивает конверсию.",            priceUsdt: 13,   discountPercent: 22, images: ["https://picsum.photos/seed/chatscripts1/1100/800"] },
-    { id: 11, name: "VIP Content Samples", short: "10 примеров контента",       full: "Структура, формат, подача и идеи, чтобы продавать лучше. Подходит для быстрых тестов и улучшения витрины.",              priceUsdt: 9.5,  discountPercent: 5,  images: ["https://picsum.photos/seed/vipsamples1/1100/800","https://picsum.photos/seed/vipsamples2/1100/800"] },
-    { id: 12, name: "Brand Color Palette", short: "30 палитр • HEX/RGB",        full: "Палитры: тёмный премиум, gold, neon, minimal, cyber. Ускоряет дизайн и делает стиль единым.",                            priceUsdt: 4.5,  discountPercent: 0,  images: ["https://picsum.photos/seed/palettes1/1100/800"] },
+    { id: 1,  name: "Neon Sticker Pack",    short: "Digital PNG • 120 шт", full: "Набор неоновых стикеров для контента и сторис. PNG, прозрачный фон. Для обложек, превью и витрины.", priceUsdt: 6.5,  discountPercent: 15, images: ["https://picsum.photos/seed/p1a/1100/800","https://picsum.photos/seed/p1b/1100/800"] },
+    { id: 2,  name: "AI Prompt Bundle",     short: "500 промптов",        full: "Портреты, стиль, свет, позы, фотореал, апскейл. Быстро даёт результат и поднимает качество.", priceUsdt: 12,   discountPercent: 25, images: ["https://picsum.photos/seed/p2a/1100/800","https://picsum.photos/seed/p2b/1100/800","https://picsum.photos/seed/p2c/1100/800"] },
+    { id: 3,  name: "Premium Backgrounds",  short: "50 фонов 4K",         full: "Коллекция премиум-фонов: dark luxury / minimal / cyber. Под обложки, посты, профили.", priceUsdt: 9, discountPercent: 10, images: ["https://picsum.photos/seed/p3a/1100/800","https://picsum.photos/seed/p3b/1100/800"] },
+    { id: 4,  name: "Video Intro Template", short: "Intro 10s • MP4",     full: "Короткая интро-заставка. Добавляешь ник/логотип — и готово.", priceUsdt: 8, discountPercent: 0, images: ["https://picsum.photos/seed/p4a/1100/800"] },
+    { id: 5,  name: "Model Caption Pack",   short: "200 подписей ENG/RU", full: "Tease, лайфстайл, флирт, продажи, прогрев. Копируй и публикуй.", priceUsdt: 7.5, discountPercent: 20, images: ["https://picsum.photos/seed/p5a/1100/800","https://picsum.photos/seed/p5b/1100/800"] },
+    { id: 6,  name: "Profile Bio Set",      short: "20 био-описаний",     full: "Серьёзно/дерзко/элитно. Можно комбинировать. Для разных ниш.", priceUsdt: 5, discountPercent: 0, images: ["https://picsum.photos/seed/p6a/1100/800"] },
+    { id: 7,  name: "Luxury Icon Pack",     short: "150 иконок SVG/PNG",  full: "Иконки премиум-стиля для интерфейса и карточек. Чёткие и лёгкие.", priceUsdt: 11, discountPercent: 18, images: ["https://picsum.photos/seed/p7a/1100/800","https://picsum.photos/seed/p7b/1100/800"] },
+    { id: 8,  name: "Photo Preset Pack",    short: "12 пресетов",         full: "Мягкий свет, кино, глянец, контраст. Делает картинку “дороже”.", priceUsdt: 10, discountPercent: 12, images: ["https://picsum.photos/seed/p8a/1100/800","https://picsum.photos/seed/p8b/1100/800"] },
+    { id: 9,  name: "Cover Design Kit",     short: "Обложки + исходники", full: "Набор обложек + исходники для редактирования. Быстрый старт.", priceUsdt: 14, discountPercent: 30, images: ["https://picsum.photos/seed/p9a/1100/800","https://picsum.photos/seed/p9b/1100/800","https://picsum.photos/seed/p9c/1100/800"] },
+    { id: 10, name: "Chat Script Pack",     short: "Скрипты продаж",      full: "Прогрев, возражения, закрытие сделки. Экономит время и повышает конверсию.", priceUsdt: 13, discountPercent: 22, images: ["https://picsum.photos/seed/p10a/1100/800"] },
+    { id: 11, name: "VIP Samples",          short: "10 примеров",         full: "Формат, подача, идеи, чтобы продавать лучше. Для тестов и улучшения витрины.", priceUsdt: 9.5, discountPercent: 5, images: ["https://picsum.photos/seed/p11a/1100/800","https://picsum.photos/seed/p11b/1100/800"] },
+    { id: 12, name: "Color Palette",        short: "30 палитр HEX/RGB",   full: "Тёмный премиум, gold, neon, minimal, cyber. Ускоряет дизайн.", priceUsdt: 4.5, discountPercent: 0, images: ["https://picsum.photos/seed/p12a/1100/800"] },
   ];
 
-  // cart qty
   const cart = {};
-  products.forEach(p => cart[p.id] = { qty: 0 });
+  products.forEach(p => (cart[p.id] = { qty: 0 }));
 
   function discountedPrice(p) {
     const d = Math.max(0, Math.min(100, Number(p.discountPercent || 0)));
@@ -84,24 +80,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function calcTotal() {
-    let total = 0;
-    products.forEach(p => total += cart[p.id].qty * discountedPrice(p));
-    return +total.toFixed(2);
+    let t = 0;
+    products.forEach(p => (t += cart[p.id].qty * discountedPrice(p)));
+    return +t.toFixed(2);
   }
 
   function updateBottomTotal() {
     totalEl.textContent = calcTotal().toFixed(2);
   }
 
-  // ===== navigation =====
+  // nav
   function navigate(where) {
     closeMenu();
     currentView = where;
     if (where === "catalog" || where === "vip") lastMainView = where;
 
     if (where === "catalog") renderCatalog();
-    if (where === "promo") renderPromo();
     if (where === "vip") renderVip();
+    if (where === "promo") renderPromo();
     if (where === "about") renderAbout();
   }
 
@@ -115,14 +111,14 @@ document.addEventListener("DOMContentLoaded", () => {
   tg.onEvent("backButtonClicked", () => {
     if (sideMenu?.classList.contains("open")) { closeMenu(); return; }
     if (currentView === "detail") { renderCatalog(); return; }
-    if (currentView === "about" || currentView === "promo" || currentView === "vip") {
+    if (currentView === "vip" || currentView === "promo" || currentView === "about") {
       navigate(lastMainView || "catalog");
       return;
     }
     navigate("catalog");
   });
 
-  // ===== checkout =====
+  // checkout
   checkoutBtn.onclick = () => {
     const items = products
       .filter(p => cart[p.id].qty > 0)
@@ -131,12 +127,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!items.length) return tg.showAlert("Корзина пуста");
 
     const order = { type: "order", total_usdt: calcTotal(), items };
-
     tg.sendData(JSON.stringify(order));
     tg.close();
   };
 
-  // ===== catalog (2x grid, NO TOP MENU in view) =====
+  // catalog
   function renderCatalog() {
     currentView = "catalog";
     tg.BackButton.hide();
@@ -146,20 +141,18 @@ document.addEventListener("DOMContentLoaded", () => {
     view.innerHTML = `
       <div class="product-list">
         ${products.map(p => {
-          const newP = discountedPrice(p);
           const hasDisc = (p.discountPercent || 0) > 0;
+          const newP = discountedPrice(p);
           return `
             <div class="product-card" data-id="${p.id}">
               <img class="product-thumb" src="${p.images[0]}" alt="${p.name}" loading="lazy">
               <div class="product-info">
                 <div class="product-name">${p.name}</div>
                 <div class="product-desc">${p.short}</div>
-
                 <div class="product-price-row">
                   ${hasDisc ? `<div class="old-price">${p.priceUsdt.toFixed(2)}</div>` : ``}
                   <div class="new-price">${newP.toFixed(2)} USDT</div>
                 </div>
-
                 <div class="product-controls" data-controls>
                   <button class="qty-btn" data-dec type="button">−</button>
                   <span class="quantity" data-qty>${cart[p.id].qty}</span>
@@ -182,7 +175,6 @@ document.addEventListener("DOMContentLoaded", () => {
         cart[id].qty++;
         qtyEl.textContent = cart[id].qty;
         updateBottomTotal();
-        tg.hapticFeedback?.impactOccurred?.("light");
       });
 
       card.querySelector("[data-dec]").addEventListener("click", (e) => {
@@ -190,7 +182,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (cart[id].qty > 0) cart[id].qty--;
         qtyEl.textContent = cart[id].qty;
         updateBottomTotal();
-        tg.hapticFeedback?.impactOccurred?.("light");
       });
 
       card.addEventListener("click", (e) => {
@@ -200,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ===== detail (slider + expandable description) =====
+  // detail
   function renderDetail(productId) {
     currentView = "detail";
     tg.BackButton.show();
@@ -224,7 +215,6 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
 
         <div class="product-detail-title">${p.name}</div>
-
         <div class="detail-price-row">
           ${hasDisc ? `<div class="old-price">${p.priceUsdt.toFixed(2)}</div>` : ``}
           <div class="new-price">${newP.toFixed(2)} USDT</div>
@@ -232,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <div class="product-detail-short" id="descToggle">
           ${p.short}
-          <span class="desc-arrow" aria-hidden="true">›</span>
+          <span class="desc-arrow">›</span>
         </div>
         <div class="product-detail-full" id="descFull">${p.full}</div>
 
@@ -269,25 +259,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const dQty = document.getElementById("dQty");
-
     document.getElementById("dInc").onclick = () => {
       cart[p.id].qty++;
       dQty.textContent = cart[p.id].qty;
       updateBottomTotal();
-      tg.hapticFeedback?.impactOccurred?.("light");
     };
     document.getElementById("dDec").onclick = () => {
       if (cart[p.id].qty > 0) cart[p.id].qty--;
       dQty.textContent = cart[p.id].qty;
       updateBottomTotal();
-      tg.hapticFeedback?.impactOccurred?.("light");
     };
 
     document.getElementById("addBtn").onclick = () => {
       cart[p.id].qty++;
       dQty.textContent = cart[p.id].qty;
       updateBottomTotal();
-      tg.hapticFeedback?.impactOccurred?.("medium");
     };
 
     const toggle = document.getElementById("descToggle");
@@ -300,40 +286,35 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("backBtn").onclick = () => renderCatalog();
   }
 
-  // ===== promo/about/vip (простые, всё в бургере) =====
+  // pages
   function renderPromo() {
     currentView = "promo";
     tg.BackButton.show();
     setBottomBarVisible(false);
     view.innerHTML = `
-      <div class="about-page">
+      <div class="simple-page">
         <h2>Промокоды</h2>
-        <p style="text-align:center;opacity:.85">Скоро подключим систему промокодов.</p>
-        <div style="margin-top:14px;text-align:center;">
-          <button class="detail-add-btn" id="back">Назад</button>
+        <p style="text-align:center;">Скоро подключим систему промокодов.</p>
+        <div style="text-align:center;margin-top:14px;">
+          <button class="detail-add-btn" id="b">Назад</button>
         </div>
       </div>`;
-    document.getElementById("back").onclick = () => navigate("catalog");
+    document.getElementById("b").onclick = () => navigate("catalog");
   }
 
-  let vipHintTimer = null;
   function renderVip() {
     currentView = "vip";
     tg.BackButton.show();
     setBottomBarVisible(false);
-    // оставляю твой VIP как отдельная страница (не трогаю дизайн тут)
     view.innerHTML = `
-      <div class="about-page">
+      <div class="simple-page">
         <h2>VIP статусы</h2>
-        <p style="text-align:center;opacity:.85">VIP уже подключён. Дальше улучшим визуал по твоим примерам.</p>
-        <div style="margin-top:14px;text-align:center;">
-          <button class="detail-add-btn" id="backVip">Назад</button>
+        <p style="text-align:center;">VIP страницу следующим шагом приведём к твоему идеалу (карточки + выбор периода + оплата).</p>
+        <div style="text-align:center;margin-top:14px;">
+          <button class="detail-add-btn" id="v">Назад</button>
         </div>
       </div>`;
-    document.getElementById("backVip").onclick = () => navigate("catalog");
-
-    if (vipHintTimer) clearInterval(vipHintTimer);
-    vipHintTimer = setInterval(() => {}, vipHintIntervalMs);
+    document.getElementById("v").onclick = () => navigate("catalog");
   }
 
   function renderAbout() {
@@ -341,14 +322,15 @@ document.addEventListener("DOMContentLoaded", () => {
     tg.BackButton.show();
     setBottomBarVisible(false);
     view.innerHTML = `
-      <div class="about-page">
+      <div class="simple-page">
         <h2>COSMO SHOP</h2>
-        <p>COSMO SHOP — магазин в Telegram: товары, VIP и оплата.</p>
-        <div style="margin-top:14px;text-align:center;">
-          <button class="detail-add-btn" id="backAbout">Назад</button>
+        <p>COSMO SHOP — магазин в Telegram: товары, VIP и оплата в USDT.</p>
+        <p>Добавляй товары в корзину и оформляй заказ. Далее подключим промокоды и VIP-оплаты.</p>
+        <div style="text-align:center;margin-top:14px;">
+          <button class="detail-add-btn" id="a">Назад</button>
         </div>
       </div>`;
-    document.getElementById("backAbout").onclick = () => navigate("catalog");
+    document.getElementById("a").onclick = () => navigate("catalog");
   }
 
   // start
