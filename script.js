@@ -30,26 +30,91 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!bottomBar) return;
     bottomBar.style.display = v ? "flex" : "none";
   }
+
+  function hapticLight() {
+    try {
+      // Telegram поддерживает разные сигналы, но иногда доступность отличается
+      tg.hapticFeedback?.impactOccurred?.("light");
+    } catch {
+      try { tg.hapticFeedback?.impactOccurred?.(); } catch {}
+    }
+  }
+
+  function lockScroll(lock) {
+    // для webview: блокируем скролл, когда меню открыто
+    document.documentElement.style.overflow = lock ? "hidden" : "";
+    document.body.style.overflow = lock ? "hidden" : "";
+  }
+
+  function isMenuOpen() {
+    return sideMenu?.classList.contains("open");
+  }
+
   function openMenu() {
     sideMenu?.classList.add("open");
     sideMenuBackdrop?.classList.add("visible");
+    menuToggle?.classList.add("open");
+    menuToggle?.setAttribute("aria-expanded", "true");
+    lockScroll(true);
+    hapticLight();
   }
+
   function closeMenu() {
     sideMenu?.classList.remove("open");
     sideMenuBackdrop?.classList.remove("visible");
+    menuToggle?.classList.remove("open");
+    menuToggle?.setAttribute("aria-expanded", "false");
+    lockScroll(false);
   }
-  closeMenu();
 
-  const toggleMenu = (e) => {
+  function toggleMenu(e) {
     e?.preventDefault?.();
     e?.stopPropagation?.();
-    sideMenu?.classList.contains("open") ? closeMenu() : openMenu();
-  };
+    if (isMenuOpen()) closeMenu();
+    else openMenu();
+  }
 
-  menuToggle?.addEventListener("click", toggleMenu);
+  // Важно: НЕ вешаем и click и pointerup одновременно — иначе в тач-среде меню откроется и сразу закроется
   menuToggle?.addEventListener("pointerup", toggleMenu);
-  sideMenuBackdrop?.addEventListener("click", (e) => { e.stopPropagation(); closeMenu(); });
-  sideMenuBackdrop?.addEventListener("pointerup", (e) => { e.stopPropagation(); closeMenu(); });
+
+  // анти-ghost: иногда после pointer события прилетает "клик"
+  menuToggle?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  });
+
+  sideMenuBackdrop?.addEventListener("pointerup", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeMenu();
+  });
+
+  // закрытие по тапу вне меню (на всякий)
+  document.addEventListener("pointerup", (e) => {
+    if (!isMenuOpen()) return;
+    const t = e.target;
+    if (sideMenu?.contains(t)) return;
+    if (menuToggle?.contains(t)) return;
+    closeMenu();
+  });
+
+  // свайп влево для закрытия меню
+  let startX = null;
+  sideMenu?.addEventListener("touchstart", (e) => {
+    if (!isMenuOpen()) return;
+    startX = e.touches?.[0]?.clientX ?? null;
+  }, { passive: true });
+
+  sideMenu?.addEventListener("touchmove", (e) => {
+    if (startX == null) return;
+    const x = e.touches?.[0]?.clientX ?? startX;
+    const dx = x - startX;
+    // если свайпнули влево ощутимо
+    if (dx < -60) {
+      startX = null;
+      closeMenu();
+    }
+  }, { passive: true });
 
   // state
   let currentView = "catalog";
@@ -109,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   tg.onEvent("backButtonClicked", () => {
-    if (sideMenu?.classList.contains("open")) { closeMenu(); return; }
+    if (isMenuOpen()) { closeMenu(); return; }
     if (currentView === "detail") { renderCatalog(); return; }
     if (currentView === "vip" || currentView === "promo" || currentView === "about") {
       navigate(lastMainView || "catalog");

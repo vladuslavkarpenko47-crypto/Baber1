@@ -37,7 +37,7 @@ body::before{
 .top-bar{
   position:sticky;
   top:0;
-  z-index:150;
+  z-index:300; /* было 150 — подняли */
   padding:14px 18px;
   background:rgba(0,0,0,.9);
   border-bottom:1px solid rgba(255,255,255,.1);
@@ -49,6 +49,9 @@ body::before{
   display:flex;
   align-items:center;
   justify-content:center;
+
+  /* важно для Telegram: чтобы "невидимые слои" не перехватывали клики */
+  pointer-events: none;
 }
 
 .shop-title{
@@ -58,6 +61,7 @@ body::before{
   letter-spacing:.15em;
   text-align:center;
   text-shadow:0 0 8px #000, 0 0 14px #000;
+  pointer-events: auto; /* возвращаем кликабельность нужным элементам */
 }
 
 /* === BURGER === */
@@ -72,7 +76,8 @@ body::before{
   flex-direction:column;
   justify-content:space-between;
   cursor:pointer;
-  z-index:200;
+  z-index:1000;          /* 🔥 поверх всего */
+  pointer-events:auto;   /* 🔥 чтобы точно ловил клики */
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -83,6 +88,19 @@ body::before{
   border-radius:999px;
   background:#fff;
   box-shadow:0 0 8px rgba(255,255,255,.9);
+  transition:transform .18s ease, opacity .18s ease;
+  transform-origin:center;
+}
+
+/* бургер -> X */
+#menuToggle.open span:nth-child(1){
+  transform:translateY(8.5px) rotate(45deg);
+}
+#menuToggle.open span:nth-child(2){
+  opacity:0;
+}
+#menuToggle.open span:nth-child(3){
+  transform:translateY(-8.5px) rotate(-45deg);
 }
 
 /* === BACKDROP === */
@@ -93,7 +111,7 @@ body::before{
   opacity:0;
   pointer-events:none;
   transition:opacity .25s ease;
-  z-index:180;
+  z-index:700;
 }
 #sideMenuBackdrop.visible{
   opacity:1;
@@ -116,7 +134,8 @@ body::before{
   gap:12px;
   transition:left .26s ease-out;
   box-shadow:10px 0 26px rgba(0,0,0,.9);
-  z-index:190;
+  z-index:800;
+  will-change:left;
 }
 #sideMenu.open{ left:0; }
 
