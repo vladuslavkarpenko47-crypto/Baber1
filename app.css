@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<голова>
+  <meta charset="UTF-8" />
+  <title>МАГАЗИН COSMO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<тело>
+  <div class="app">
+    <!-- ЗАГОЛОВОК -->
+    <header class="top-bar">
+      <div class="header-inner">
+        <div id="menuToggle" role="button" aria-label="Menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="shop-title">МАГАЗИН COSMO</div>
+      </div>
+    </header>
+
+    <!-- Фон меню -->
+    <div id="sideMenuBackdrop"></div>
+
+    <!-- БОКОВОЕ МЕНЮ -->
+    <nav id="sideMenu">
+      <button class="side-menu-btn" data-nav="catalog">Каталог</button>
+      <button class="side-menu-btn" data-nav="vip">VIP-статусы</button>
+      <button class="side-menu-btn" data-nav="promo">Промокоды</button>
+      <button class="side-menu-btn" data-nav="about">О магазине</button>
+    </nav>
+
+    <!-- ПРОСМОТР -->
+    <main id="view"></main>
+
+    <!-- НИЖНЯЯ ПАНЕЛЬ (ТОЛЬКО ДЛЯ КАТАЛОГА) -->
+    <footer class="bottom-bar">
+      <div class="total-text">Итого: <span id="total">0,00</span> USDT</div>
+      <button id="checkout">Оформить заказ</button>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
+body { outline: 6px solid red !important; }
