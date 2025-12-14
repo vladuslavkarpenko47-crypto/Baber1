@@ -1,3 +1,5 @@
+alert("JS LOADED ✅");
+
 document.addEventListener("DOMContentLoaded", () => {
   // ✅ работает и в Telegram, и в браузере
   const tg = window.Telegram?.WebApp ?? {
@@ -579,4 +581,5 @@ document.addEventListener("DOMContentLoaded", () => {
   // старт
   closeMenu();
   renderCatalog();
+
 });
