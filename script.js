@@ -324,6 +324,30 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     const cards = Array.from(view.querySelectorAll(".vip-card"));
+// ===== AUTO-HINT (soft, always on) =====
+const vipRow = document.getElementById("vipRow");
+let hintDir = 1;
+
+setInterval(() => {
+  if (!vipRow) return;
+
+  // если пользователь сейчас скроллит — не мешаем
+  if (vipRow.matches(":active")) return;
+
+  vipRow.classList.add("vip-hint-animate");
+
+  // лёгкий визуальный сдвиг
+  vipRow.scrollBy({
+    left: 12 * hintDir,
+    behavior: "smooth"
+  });
+
+  hintDir *= -1;
+
+  setTimeout(() => {
+    vipRow.classList.remove("vip-hint-animate");
+  }, 900);
+}, 6500);
     const payBtn = document.getElementById("vipPayBtn");
 
     function setPayEnabled(enabled) {

@@ -371,3 +371,15 @@ body::before {
 .silver .vip-aura { background: #ccc; }
 .gold .vip-aura { background: #ffd700; }
 .diamond .vip-aura { background: #6fdcff; }
+.vip-row.vip-hint-animate {
+  transition: transform 0.8s ease;
+}
+
+.vip-hint {
+  animation: vipHintFade 4.5s ease-in-out infinite;
+}
+
+@keyframes vipHintFade {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.85; }
+}
