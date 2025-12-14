@@ -1,586 +1,522 @@
-document.addEventListener("DOMContentLoaded", () => {
-  // ✅ работает и в Telegram, и в браузере (для проверки по ссылке)
-  const tg = window.Telegram?.WebApp ?? {
-    ready: () => {},
-    expand: () => {},
-    close: () => {},
-    sendData: (x) => console.log("sendData:", x),
-    showAlert: (x) => alert(x),
-    onEvent: () => {},
-    BackButton: { show: () => {}, hide: () => {} },
-    hapticFeedback: { impactOccurred: () => {} },
-  };
+/* === GLOBAL === */
+* { box-sizing: border-box; }
 
-  tg.ready();
-  tg.expand();
-  setTimeout(() => tg.expand(), 60);
-  setTimeout(() => tg.expand(), 250);
-
-  const view = document.getElementById("view");
-  const totalEl = document.getElementById("total");
-  const checkoutBtn = document.getElementById("checkout");
-  const bottomBar = document.querySelector(".bottom-bar");
-
-  // menu
-  const menuToggle = document.getElementById("menuToggle");
-  const sideMenu = document.getElementById("sideMenu");
-  const sideMenuBackdrop = document.getElementById("sideMenuBackdrop");
-
-  function setBottomBarVisible(v) {
-    if (!bottomBar) return;
-    bottomBar.style.display = v ? "flex" : "none";
-  }
-
-  function hapticLight() {
-    try {
-      // Telegram поддерживает разные сигналы, но иногда доступность отличается
-      tg.hapticFeedback?.impactOccurred?.("light");
-    } catch {
-      try { tg.hapticFeedback?.impactOccurred?.(); } catch {}
-    }
-  }
-
-  function lockScroll(lock) {
-    // для webview: блокируем скролл, когда меню открыто
-    document.documentElement.style.overflow = lock ? "hidden" : "";
-    document.body.style.overflow = lock ? "hidden" : "";
-  }
-
-  function isMenuOpen() {
-    return sideMenu?.classList.contains("open");
-  }
-
-  function openMenu() {
-    sideMenu?.classList.add("open");
-    sideMenuBackdrop?.classList.add("visible");
-    menuToggle?.classList.add("open");
-    menuToggle?.setAttribute("aria-expanded", "true");
-    lockScroll(true);
-    hapticLight();
-  }
-
-  function closeMenu() {
-    sideMenu?.classList.remove("open");
-    sideMenuBackdrop?.classList.remove("visible");
-    menuToggle?.classList.remove("open");
-    menuToggle?.setAttribute("aria-expanded", "false");
-    lockScroll(false);
-  }
-
-  function toggleMenu(e) {
-    e?.preventDefault?.();
-    e?.stopPropagation?.();
-    if (isMenuOpen()) closeMenu();
-    else openMenu();
-  }
-
-  // Важно: НЕ вешаем и click и pointerup одновременно — иначе в тач-среде меню откроется и сразу закроется
-  menuToggle?.addEventListener("pointerup", toggleMenu);
-
-  // анти-ghost: иногда после pointer события прилетает "клик"
-  menuToggle?.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  });
-
-  sideMenuBackdrop?.addEventListener("pointerup", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    closeMenu();
-  });
-
-  // закрытие по тапу вне меню (на всякий)
-  document.addEventListener("pointerup", (e) => {
-    if (!isMenuOpen()) return;
-    const t = e.target;
-    if (sideMenu?.contains(t)) return;
-    if (menuToggle?.contains(t)) return;
-    closeMenu();
-  });
-
-  // свайп влево для закрытия меню
-  let startX = null;
-  sideMenu?.addEventListener("touchstart", (e) => {
-    if (!isMenuOpen()) return;
-    startX = e.touches?.[0]?.clientX ?? null;
-  }, { passive: true });
-
-  sideMenu?.addEventListener("touchmove", (e) => {
-    if (startX == null) return;
-    const x = e.touches?.[0]?.clientX ?? startX;
-    const dx = x - startX;
-    // если свайпнули влево ощутимо
-    if (dx < -60) {
-      startX = null;
-      closeMenu();
-    }
-  }, { passive: true });
-
-  // state
-  let currentView = "catalog";
-  let lastMainView = "catalog";
-
-  // products
-  const products = [
-    { id: 1,  name: "Neon Sticker Pack",    short: "Digital PNG • 120 шт", full: "Набор неоновых стикеров для контента и сторис. PNG, прозрачный фон. Для обложек, превью и витрины.", priceUsdt: 6.5,  discountPercent: 15, images: ["https://picsum.photos/seed/p1a/1100/800","https://picsum.photos/seed/p1b/1100/800"] },
-    { id: 2,  name: "AI Prompt Bundle",     short: "500 промптов",        full: "Портреты, стиль, свет, позы, фотореал, апскейл. Быстро даёт результат и поднимает качество.", priceUsdt: 12,   discountPercent: 25, images: ["https://picsum.photos/seed/p2a/1100/800","https://picsum.photos/seed/p2b/1100/800","https://picsum.photos/seed/p2c/1100/800"] },
-    { id: 3,  name: "Premium Backgrounds",  short: "50 фонов 4K",         full: "Коллекция премиум-фонов: dark luxury / minimal / cyber. Под обложки, посты, профили.", priceUsdt: 9, discountPercent: 10, images: ["https://picsum.photos/seed/p3a/1100/800","https://picsum.photos/seed/p3b/1100/800"] },
-    { id: 4,  name: "Video Intro Template", short: "Intro 10s • MP4",     full: "Короткая интро-заставка. Добавляешь ник/логотип — и готово.", priceUsdt: 8, discountPercent: 0, images: ["https://picsum.photos/seed/p4a/1100/800"] },
-    { id: 5,  name: "Model Caption Pack",   short: "200 подписей ENG/RU", full: "Tease, лайфстайл, флирт, продажи, прогрев. Копируй и публикуй.", priceUsdt: 7.5, discountPercent: 20, images: ["https://picsum.photos/seed/p5a/1100/800","https://picsum.photos/seed/p5b/1100/800"] },
-    { id: 6,  name: "Profile Bio Set",      short: "20 био-описаний",     full: "Серьёзно/дерзко/элитно. Можно комбинировать. Для разных ниш.", priceUsdt: 5, discountPercent: 0, images: ["https://picsum.photos/seed/p6a/1100/800"] },
-    { id: 7,  name: "Luxury Icon Pack",     short: "150 иконок SVG/PNG",  full: "Иконки премиум-стиля для интерфейса и карточек. Чёткие и лёгкие.", priceUsdt: 11, discountPercent: 18, images: ["https://picsum.photos/seed/p7a/1100/800","https://picsum.photos/seed/p7b/1100/800"] },
-    { id: 8,  name: "Photo Preset Pack",    short: "12 пресетов",         full: "Мягкий свет, кино, глянец, контраст. Делает картинку “дороже”.", priceUsdt: 10, discountPercent: 12, images: ["https://picsum.photos/seed/p8a/1100/800","https://picsum.photos/seed/p8b/1100/800"] },
-    { id: 9,  name: "Cover Design Kit",     short: "Обложки + исходники", full: "Набор обложек + исходники для редактирования. Быстрый старт.", priceUsdt: 14, discountPercent: 30, images: ["https://picsum.photos/seed/p9a/1100/800","https://picsum.photos/seed/p9b/1100/800","https://picsum.photos/seed/p9c/1100/800"] },
-    { id: 10, name: "Chat Script Pack",     short: "Скрипты продаж",      full: "Прогрев, возражения, закрытие сделки. Экономит время и повышает конверсию.", priceUsdt: 13, discountPercent: 22, images: ["https://picsum.photos/seed/p10a/1100/800"] },
-    { id: 11, name: "VIP Samples",          short: "10 примеров",         full: "Формат, подача, идеи, чтобы продавать лучше. Для тестов и улучшения витрины.", priceUsdt: 9.5, discountPercent: 5, images: ["https://picsum.photos/seed/p11a/1100/800","https://picsum.photos/seed/p11b/1100/800"] },
-    { id: 12, name: "Color Palette",        short: "30 палитр HEX/RGB",   full: "Тёмный премиум, gold, neon, minimal, cyber. Ускоряет дизайн.", priceUsdt: 4.5, discountPercent: 0, images: ["https://picsum.photos/seed/p12a/1100/800"] },
-  ];
-
-  const cart = {};
-  products.forEach(p => (cart[p.id] = { qty: 0 }));
-
-  function discountedPrice(p) {
-    const d = Math.max(0, Math.min(100, Number(p.discountPercent || 0)));
-    return +(p.priceUsdt * (1 - d / 100)).toFixed(2);
-  }
-
-  function calcTotal() {
-    let t = 0;
-    products.forEach(p => (t += cart[p.id].qty * discountedPrice(p)));
-    return +t.toFixed(2);
-  }
-
-  function updateBottomTotal() {
-    totalEl.textContent = calcTotal().toFixed(2);
-  }
-
-  // nav
-  function navigate(where) {
-    closeMenu();
-    currentView = where;
-    if (where === "catalog" || where === "vip") lastMainView = where;
-
-    if (where === "catalog") renderCatalog();
-    if (where === "vip") renderVip();
-    if (where === "promo") renderPromo();
-    if (where === "about") renderAbout();
-  }
-
-  document.querySelectorAll("#sideMenu .side-menu-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const nav = btn.getAttribute("data-nav");
-      if (nav) navigate(nav);
-    });
-  });
-
-  tg.onEvent("backButtonClicked", () => {
-    if (isMenuOpen()) { closeMenu(); return; }
-    if (currentView === "detail") { renderCatalog(); return; }
-    if (currentView === "vip" || currentView === "promo" || currentView === "about") {
-      navigate(lastMainView || "catalog");
-      return;
-    }
-    navigate("catalog");
-  });
-
-  // checkout
-  checkoutBtn.onclick = () => {
-    const items = products
-      .filter(p => cart[p.id].qty > 0)
-      .map(p => ({ name: p.name, qty: cart[p.id].qty, priceUsdt: discountedPrice(p) }));
-
-    if (!items.length) return tg.showAlert("Корзина пуста");
-
-    const order = { type: "order", total_usdt: calcTotal(), items };
-    tg.sendData(JSON.stringify(order));
-    tg.close();
-  };
-
-  // catalog
-function renderCatalog() {
-  currentView = "catalog";
-  tg.BackButton.hide();
-  setBottomBarVisible(true);
-  updateBottomTotal();
-
-  view.innerHTML = `
-    <div class="vip-cta">
-      <div class="vip-cta-text">
-        <div class="vip-cta-title">VIP статус</div>
-        <div class="vip-cta-sub">Выбери Bronze / Silver / Gold / Diamond</div>
-      </div>
-      <button class="detail-add-btn vip-cta-btn" id="goVip" type="button">Открыть</button>
-    </div>
-
-    <div class="product-list">
-      ${products.map(p => {
-        const hasDisc = (p.discountPercent || 0) > 0;
-        const newP = discountedPrice(p);
-        return `
-          <div class="product-card" data-id="${p.id}">
-            <img class="product-thumb" src="${p.images[0]}" alt="${p.name}" loading="lazy">
-            <div class="product-info">
-              <div class="product-name">${p.name}</div>
-              <div class="product-desc">${p.short}</div>
-              <div class="product-price-row">
-                ${hasDisc ? `<div class="old-price">${p.priceUsdt.toFixed(2)}</div>` : ``}
-                <div class="new-price">${newP.toFixed(2)} USDT</div>
-              </div>
-              <div class="product-controls" data-controls>
-                <button class="qty-btn" data-dec type="button">−</button>
-                <span class="quantity" data-qty>${cart[p.id].qty}</span>
-                <button class="qty-btn" data-inc type="button">+</button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join("")}
-    </div>
-  `;
-
-  // VIP button
-  document.getElementById("goVip").onclick = () => navigate("vip");
-
-  view.querySelectorAll(".product-card").forEach(card => {
-    const id = +card.dataset.id;
-    const controls = card.querySelector("[data-controls]");
-    const qtyEl = card.querySelector("[data-qty]");
-
-    card.querySelector("[data-inc]").addEventListener("click", (e) => {
-      e.preventDefault(); e.stopPropagation();
-      cart[id].qty++;
-      qtyEl.textContent = cart[id].qty;
-      updateBottomTotal();
-    });
-
-    card.querySelector("[data-dec]").addEventListener("click", (e) => {
-      e.preventDefault(); e.stopPropagation();
-      if (cart[id].qty > 0) cart[id].qty--;
-      qtyEl.textContent = cart[id].qty;
-      updateBottomTotal();
-    });
-
-    card.addEventListener("click", (e) => {
-      if (controls.contains(e.target)) return;
-      renderDetail(id);
-    });
-  });
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #fff;
+  background: #0c0c0c;
+  overscroll-behavior: none;
 }
 
-  // detail
-  function renderDetail(productId) {
-    currentView = "detail";
-    tg.BackButton.show();
-    setBottomBarVisible(false);
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image:url("img/background.webp");
+  background-size:cover;
+  background-position:center;
+  opacity:.18;
+  filter:blur(18px);
+  transform:scale(1.1);
+  z-index:-1;
+  pointer-events:none;
+}
 
-    const p = products.find(x => x.id === productId);
-    if (!p) return renderCatalog();
+/* === APP === */
+.app{
+  width:100%;
+  max-width:480px;
+  margin:0 auto;
+  padding-bottom:150px;
+}
 
-    let idx = 0;
-    const newP = discountedPrice(p);
-    const hasDisc = (p.discountPercent || 0) > 0;
+/* === HEADER === */
+.top-bar{
+  position:sticky;
+  top:0;
+  z-index:300;
+  padding:14px 18px;
+  background:rgba(0,0,0,.9);
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
 
-    view.innerHTML = `
-      <div class="product-detail">
-        <div class="detail-slider">
-          <img class="detail-image" id="detailImg" src="${p.images[0]}" alt="${p.name}">
-          ${p.images.length > 1 ? `
-            <button class="slider-btn left" id="prevImg" type="button">‹</button>
-            <button class="slider-btn right" id="nextImg" type="button">›</button>
-          ` : ``}
-        </div>
+.header-inner{
+  position:relative;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none; /* важно для Telegram WebView */
+}
 
-        <div class="product-detail-title">${p.name}</div>
-        <div class="detail-price-row">
-          ${hasDisc ? `<div class="old-price">${p.priceUsdt.toFixed(2)}</div>` : ``}
-          <div class="new-price">${newP.toFixed(2)} USDT</div>
-        </div>
+.shop-title{
+  font-size:22px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.15em;
+  text-align:center;
+  text-shadow:0 0 8px #000, 0 0 14px #000;
+  pointer-events:auto;
+}
 
-        <div class="product-detail-short" id="descToggle">
-          ${p.short}
-          <span class="desc-arrow">›</span>
-        </div>
-        <div class="product-detail-full" id="descFull">${p.full}</div>
+/* === BURGER === */
+#menuToggle{
+  position:absolute;
+  left:16px;
+  top:50%;
+  transform:translateY(-50%);
+  width:28px;
+  height:20px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  cursor:pointer;
+  z-index:1000;
+  pointer-events:auto;
+  -webkit-tap-highlight-color: transparent;
+}
 
-        <div class="detail-qty-row">
-          <button class="qty-btn" id="dDec" type="button">−</button>
-          <span class="quantity" id="dQty">${cart[p.id].qty}</span>
-          <button class="qty-btn" id="dInc" type="button">+</button>
-        </div>
+#menuToggle span{
+  display:block;
+  width:100%;
+  height:3px;
+  border-radius:999px;
+  background:#fff;
+  box-shadow:0 0 8px rgba(255,255,255,.9);
+  transition:transform .18s ease, opacity .18s ease;
+  transform-origin:center;
+}
 
-        <button class="detail-add-btn" id="addBtn" type="button">Добавить</button>
+/* burger -> X */
+#menuToggle.open span:nth-child(1){ transform:translateY(8.5px) rotate(45deg); }
+#menuToggle.open span:nth-child(2){ opacity:0; }
+#menuToggle.open span:nth-child(3){ transform:translateY(-8.5px) rotate(-45deg); }
 
-        <div style="margin-top:12px;text-align:center;">
-          <button class="detail-add-btn" id="backBtn" type="button">Назад</button>
-        </div>
-      </div>
-    `;
+/* === BACKDROP === */
+#sideMenuBackdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .25s ease;
+  z-index:700;
+}
+#sideMenuBackdrop.visible{
+  opacity:1;
+  pointer-events:auto;
+}
 
-    const imgEl = document.getElementById("detailImg");
-    const prevBtn = document.getElementById("prevImg");
-    const nextBtn = document.getElementById("nextImg");
+/* === SIDE MENU === */
+#sideMenu{
+  position:fixed;
+  top:0;
+  left:-70%;
+  width:70%;
+  max-width:300px;
+  height:100%;
+  background:radial-gradient(circle at top, rgba(255,255,255,.08), rgba(0,0,0,.96) 55%);
+  backdrop-filter:blur(18px);
+  padding:24px 18px 18px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  transition:left .26s ease-out;
+  box-shadow:10px 0 26px rgba(0,0,0,.9);
+  z-index:800;
+  will-change:left;
+}
+#sideMenu.open{ left:0; }
 
-    function setImg(i) {
-      idx = i;
-      imgEl.src = p.images[idx];
-    }
+.side-menu-btn{
+  padding:12px 16px;
+  border-radius:999px;
+  border:none;
+  background:linear-gradient(135deg,#ffb800,#ffe58a);
+  color:#201300;
+  font-weight:700;
+  font-size:15px;
+  text-align:left;
+  cursor:pointer;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08), 0 8px 22px rgba(0,0,0,.85);
+  transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.side-menu-btn:hover{
+  filter:brightness(1.06);
+  transform:translateY(-1px);
+  box-shadow:0 0 0 1px rgba(255,255,255,.14), 0 12px 26px rgba(0,0,0,.95);
+}
+.side-menu-btn:active{ transform:translateY(1px) scale(.97); }
 
-    prevBtn?.addEventListener("click", (e) => {
-      e.preventDefault();
-      setImg((idx - 1 + p.images.length) % p.images.length);
-    });
-    nextBtn?.addEventListener("click", (e) => {
-      e.preventDefault();
-      setImg((idx + 1) % p.images.length);
-    });
+/* === PRODUCT GRID 2x === */
+.product-list{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+  padding:14px;
+}
 
-    const dQty = document.getElementById("dQty");
-    document.getElementById("dInc").onclick = () => {
-      cart[p.id].qty++;
-      dQty.textContent = cart[p.id].qty;
-      updateBottomTotal();
-    };
-    document.getElementById("dDec").onclick = () => {
-      if (cart[p.id].qty > 0) cart[p.id].qty--;
-      dQty.textContent = cart[p.id].qty;
-      updateBottomTotal();
-    };
+.product-card{
+  position:relative;
+  background:rgba(0,0,0,.55);
+  border-radius:16px;
+  overflow:hidden;
+  backdrop-filter:blur(8px);
+  box-shadow:0 8px 18px rgba(0,0,0,.7);
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,.08);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  transform-origin:center center;
+  -webkit-tap-highlight-color: transparent;
+}
+.product-card:hover{
+  transform:translateY(-6px) scale(1.02);
+  box-shadow:0 16px 30px rgba(0,0,0,.95), 0 0 18px rgba(255,184,0,.45);
+  border-color:rgba(255,219,120,.7);
+}
+.product-card:active{
+  transform:translateY(-1px) scale(.99);
+  box-shadow:0 6px 16px rgba(0,0,0,.85);
+}
 
-    document.getElementById("addBtn").onclick = () => {
-      cart[p.id].qty++;
-      dQty.textContent = cart[p.id].qty;
-      updateBottomTotal();
-    };
+.product-thumb{
+  width:100%;
+  height:140px;
+  object-fit:cover;
+  display:block;
+  transition:transform .28s ease;
+}
+.product-card:hover .product-thumb{ transform:scale(1.07) translateY(-2px); }
 
-    const toggle = document.getElementById("descToggle");
-    const full = document.getElementById("descFull");
-    toggle.onclick = () => {
-      full.classList.toggle("visible");
-      toggle.classList.toggle("open");
-    };
+.product-info{ padding:10px; }
 
-    document.getElementById("backBtn").onclick = () => renderCatalog();
-  }
+.product-name{ font-weight:700; margin:0 0 4px; font-size:15px; }
+.product-desc{ font-size:12px; opacity:.78; margin-bottom:6px; }
 
-  // pages
-  function renderPromo() {
-    currentView = "promo";
-    tg.BackButton.show();
-    setBottomBarVisible(false);
-    view.innerHTML = `
-      <div class="simple-page">
-        <h2>Промокоды</h2>
-        <p style="text-align:center;">Скоро подключим систему промокодов.</p>
-        <div style="text-align:center;margin-top:14px;">
-          <button class="detail-add-btn" id="b">Назад</button>
-        </div>
-      </div>`;
-    document.getElementById("b").onclick = () => navigate("catalog");
-  }
+/* price */
+.product-price-row, .detail-price-row{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.old-price{ opacity:.6; text-decoration:line-through; font-size:13px; }
+.new-price{ color:#ffdd55; font-weight:700; font-size:15px; }
 
-function renderVip() {
-  currentView = "vip";
-  tg.BackButton.show();
-  setBottomBarVisible(false);
+/* qty */
+.product-controls, .detail-qty-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  margin-top:8px;
+}
+.qty-btn{
+  width:32px;
+  height:32px;
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:10px;
+  color:#fff;
+  font-size:18px;
+  font-weight:700;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 2px 6px rgba(0,0,0,.45), inset 0 0 4px rgba(255,255,255,.06);
+  transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.qty-btn:hover{ background:rgba(255,255,255,.24); transform:translateY(-1px); }
+.qty-btn:active{ transform:translateY(1px) scale(.95); }
+.quantity{ font-size:14px; font-weight:600; }
 
-  const vipPlans = [
-    {
-      id: "bronze",
-      name: "Bronze VIP",
-      badge: "Start",
-      icon: "🥉",
-      description: "Базовый VIP доступ для старта. Отлично, чтобы попробовать VIP-формат.",
-      perks: [
-        "Доступ к закрытым VIP-подборкам",
-        "Ранний доступ к новинкам",
-        "Приоритет в поддержке (стандарт)"
-      ],
-      monthlyPrice: 19
-    },
-    {
-      id: "silver",
-      name: "Silver VIP",
-      badge: "Plus",
-      icon: "🥈",
-      description: "Больше материалов и выгоднее цена на срок. Для регулярных покупок.",
-      perks: [
-        "Всё из Bronze + расширенные наборы",
-        "Скидки на новые релизы",
-        "Приоритет поддержки (выше)"
-      ],
-      monthlyPrice: 29
-    },
-    {
-      id: "gold",
-      name: "Gold VIP",
-      badge: "Best",
-      icon: "🥇",
-      description: "Максимум пользы и лучшие подборки. Самый популярный уровень.",
-      perks: [
-        "Всё из Silver + топовые премиум-материалы",
-        "Еженедельные эксклюзивы",
-        "Самый высокий приоритет поддержки"
-      ],
-      monthlyPrice: 49
-    },
-    {
-      id: "diamond",
-      name: "Diamond VIP",
-      badge: "Elite",
-      icon: "💎",
-      description: "Элитный VIP: максимум доступа и самый мощный пакет преимуществ.",
-      perks: [
-        "Всё из Gold + эксклюзивные редкие релизы",
-        "Индивидуальные подборки (по запросу)",
-        "Персональный приоритет поддержки"
-      ],
-      monthlyPrice: 79
-    }
-  ];
+/* === DETAIL === */
+.product-detail{ padding:14px; }
 
-  const monthsOptions = [1, 3, 6, 12];
+.detail-slider{ position:relative; margin-bottom:12px; }
+.detail-image{
+  width:100%;
+  border-radius:16px;
+  box-shadow:0 4px 16px rgba(0,0,0,.7);
+}
+.slider-btn{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  background:rgba(0,0,0,.75);
+  border:1px solid rgba(255,255,255,.28);
+  color:#fff;
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  font-size:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,0,0,.8);
+}
+.slider-btn.left{ left:10px; }
+.slider-btn.right{ right:10px; }
 
-  // выбранные значения
-  let selectedPlanId = null;
-  const selectedMonthsByPlan = {};
-  vipPlans.forEach(p => selectedMonthsByPlan[p.id] = 1);
+.product-detail-title{
+  font-size:20px;
+  font-weight:700;
+  margin:14px 0 8px;
+  text-align:center;
+}
+.detail-price-row{ justify-content:center; margin-bottom:8px; }
 
-  function calcVipPrice(plan, months) {
-    // можно сделать скидку за срок (лёгкая, выглядит “по-взрослому”)
-    let coef = 1;
-    if (months === 3) coef = 0.95;
-    if (months === 6) coef = 0.90;
-    if (months === 12) coef = 0.85;
-    return +(plan.monthlyPrice * months * coef).toFixed(2);
-  }
+.product-detail-short{
+  margin-top:10px;
+  font-size:14px;
+  opacity:.92;
+  cursor:pointer;
+  position:relative;
+  padding-right:26px;
+  user-select:none;
+}
+.product-detail-full{
+  font-size:13px;
+  opacity:.85;
+  line-height:1.5;
+  margin-top:6px;
+  display:none;
+}
+.product-detail-full.visible{ display:block; }
 
-  function haptic() {
-    try { tg.hapticFeedback?.impactOccurred?.("light"); } catch {}
-  }
+.desc-arrow{
+  position:absolute;
+  right:0;
+  top:0;
+  display:inline-block;
+  opacity:.85;
+  transform:rotate(90deg);
+  animation:arrowWiggle 1.5s ease-in-out infinite;
+}
+.product-detail-short.open .desc-arrow{ transform:rotate(270deg); }
+@keyframes arrowWiggle{
+  0%,100%{ transform:rotate(90deg) translateX(0); opacity:.65; }
+  50%{ transform:rotate(90deg) translateX(4px); opacity:1; }
+}
 
-  view.innerHTML = `
-    <div class="vip-page">
-      <div class="vip-top">
-        <h2>VIP статус</h2>
-        <p>Выбери VIP и период (в месяцах). Нажми “Выбрать” — и я отправлю заявку в бота.</p>
-      </div>
+/* === BUTTONS (yellow + shine) === */
+.detail-add-btn,
+#checkout{
+  background:linear-gradient(135deg,#ffb800,#ffe58a);
+  padding:12px 24px;
+  border-radius:999px;
+  border:none;
+  font-weight:700;
+  color:#201300;
+  font-size:16px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08), 0 10px 24px rgba(0,0,0,.8);
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.detail-add-btn:hover,
+#checkout:hover{
+  filter:brightness(1.04);
+  box-shadow:0 0 0 1px rgba(255,255,255,.12), 0 14px 30px rgba(0,0,0,.9);
+  transform:translateY(-1px);
+}
+.detail-add-btn::after,
+#checkout::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 0 0, rgba(255,255,255,.55), transparent 60%);
+  opacity:0;
+  transform:translateX(-40%);
+  transition:opacity .25s ease, transform .25s ease;
+}
+.detail-add-btn:hover::after,
+#checkout:hover::after{
+  opacity:1;
+  transform:translateX(40%);
+}
+.detail-add-btn:active,
+#checkout:active{ transform:translateY(1px) scale(.97); }
 
-      <div class="vip-row">
-        ${vipPlans.map(plan => {
-          const m = selectedMonthsByPlan[plan.id];
-          const price = calcVipPrice(plan, m);
-          return `
-            <div class="vip-cardx" data-plan="${plan.id}">
-              <div class="vip-headx">
-                <div class="vip-namex">${plan.name}</div>
-                <div class="vip-badgex">${plan.badge}</div>
-              </div>
+/* === BOTTOM BAR === */
+.bottom-bar{
+  position:fixed;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:480px;
+  padding:12px 16px;
+  background:rgba(0,0,0,.78);
+  border-top:1px solid rgba(255,255,255,.1);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  backdrop-filter:blur(10px);
+  box-shadow:0 -8px 18px rgba(0,0,0,.85);
+  z-index:120;
+}
+.total-text{ font-size:15px; opacity:.9; }
 
-              <div class="vip-art ${plan.id}">
-                <div class="vip-orb"></div>
-                <div class="vip-spark"></div>
-                <div class="vip-icon">${plan.icon}</div>
-              </div>
+/* === SIMPLE PAGES === */
+.simple-page{ padding:16px; line-height:1.6; }
+.simple-page h2{
+  text-align:center;
+  margin:10px 0 12px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.simple-page p{ font-size:14px; opacity:.9; }
 
-              <div class="vip-desc">${plan.description}</div>
+/* === VIP PAGE === */
+.vip-page{ padding:14px; }
+.vip-top{ text-align:center; margin:6px 0 10px; }
+.vip-top h2{ margin:0; letter-spacing:.12em; text-transform:uppercase; }
+.vip-top p{ margin:6px 0 0; font-size:14px; opacity:.85; }
 
-              <ul class="vip-listx">
-                ${plan.perks.map(x => `<li>${x}</li>`).join("")}
-              </ul>
+.vip-row{
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+  padding:10px 4px 14px;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+}
+.vip-row::-webkit-scrollbar{ height:8px; }
+.vip-row::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.14); border-radius:999px; }
 
-              <div class="vip-months" data-months>
-                ${monthsOptions.map(mm => `
-                  <button class="vip-chip ${mm === 1 ? "active" : ""}" data-m="${mm}" type="button">${mm} мес</button>
-                `).join("")}
-              </div>
+.vip-cardx{
+  flex:0 0 86%;
+  max-width:420px;
+  scroll-snap-align:start;
+  background:rgba(0,0,0,.55);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:18px;
+  padding:14px;
+  box-shadow:0 10px 22px rgba(0,0,0,.75);
+  backdrop-filter:blur(10px);
+  position:relative;
+  overflow:hidden;
+  transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+@media (min-width:460px){ .vip-cardx{ flex:0 0 70%; } }
+.vip-cardx.selected{
+  border-color:rgba(255,219,120,.75);
+  box-shadow:0 18px 34px rgba(0,0,0,.92), 0 0 18px rgba(255,184,0,.35);
+  transform:translateY(-2px);
+}
 
-              <div class="vip-pricex" data-price>${price.toFixed(2)} USDT</div>
-              <div class="vip-timehint">Срок: <b data-time>${m}</b> мес</div>
+.vip-headx{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.vip-namex{ font-size:18px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+.vip-badgex{
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  color:#201300;
+  background:linear-gradient(135deg,#ffb800,#ffe58a);
+  box-shadow:0 0 0 1px rgba(255,255,255,.10), 0 8px 18px rgba(0,0,0,.65);
+}
 
-              <button class="detail-add-btn vip-select-btn" data-select type="button">Выбрать</button>
-            </div>
-          `;
-        }).join("")}
-      </div>
+/* animated art */
+.vip-art{
+  height:110px;
+  border-radius:16px;
+  margin:12px 0 10px;
+  border:1px solid rgba(255,255,255,.10);
+  background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.16), rgba(0,0,0,.65));
+  position:relative;
+  overflow:hidden;
+  box-shadow:inset 0 0 18px rgba(0,0,0,.7);
+}
+.vip-orb{
+  position:absolute;
+  width:140px;
+  height:140px;
+  border-radius:50%;
+  left:-30px;
+  top:-30px;
+  opacity:.95;
+  animation:vipFloat 3.2s ease-in-out infinite;
+}
+.vip-spark{
+  position:absolute;
+  inset:-40px;
+  background:conic-gradient(from 0deg, rgba(255,255,255,.0), rgba(255,255,255,.22), rgba(255,255,255,.0));
+  opacity:.35;
+  animation:vipSpin 2.6s linear infinite;
+}
+.vip-icon{
+  position:absolute;
+  right:14px;
+  bottom:12px;
+  font-size:34px;
+  opacity:.92;
+  text-shadow:0 8px 18px rgba(0,0,0,.7);
+  animation:vipPulse 1.8s ease-in-out infinite;
+}
 
-      <div style="text-align:center;margin-top:4px;">
-        <button class="detail-add-btn" id="vipBack" type="button">Назад</button>
-      </div>
-    </div>
-  `;
+@keyframes vipFloat{ 0%,100%{ transform:translate(0,0) scale(1); } 50%{ transform:translate(12px,10px) scale(1.03); } }
+@keyframes vipSpin{ 0%{ transform:rotate(0deg); } 100%{ transform:rotate(360deg); } }
+@keyframes vipPulse{ 0%,100%{ transform:scale(1); opacity:.9; } 50%{ transform:scale(1.06); opacity:1; } }
 
-  // навесим обработчики на карточки
-  view.querySelectorAll(".vip-cardx").forEach(card => {
-    const planId = card.getAttribute("data-plan");
-    const plan = vipPlans.find(p => p.id === planId);
+/* themes */
+.vip-art.bronze .vip-orb{ background:radial-gradient(circle at 30% 30%, rgba(255,190,120,.95), rgba(120,60,10,.45)); }
+.vip-art.silver .vip-orb{ background:radial-gradient(circle at 30% 30%, rgba(230,240,255,.95), rgba(120,130,150,.45)); }
+.vip-art.gold .vip-orb{ background:radial-gradient(circle at 30% 30%, rgba(255,220,120,.95), rgba(150,90,0,.45)); }
+.vip-art.diamond .vip-orb{ background:radial-gradient(circle at 30% 30%, rgba(160,240,255,.95), rgba(70,120,180,.45)); }
 
-    const monthsWrap = card.querySelector("[data-months]");
-    const priceEl = card.querySelector("[data-price]");
-    const timeEl = card.querySelector("[data-time]");
-    const selectBtn = card.querySelector("[data-select]");
+.vip-desc{ font-size:13px; opacity:.9; line-height:1.55; margin:6px 0 10px; }
+.vip-listx{ margin:0 0 10px; padding-left:18px; font-size:13px; opacity:.92; line-height:1.55; }
 
-    // выбор месяцев
-    monthsWrap.querySelectorAll(".vip-chip").forEach(chip => {
-      chip.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+.vip-months{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin:10px 0 10px;
+}
+.vip-chip{
+  border:none;
+  cursor:pointer;
+  padding:8px 12px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:13px;
+  color:#fff;
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.18);
+  transition:transform .12s ease, background .12s ease, filter .12s ease;
+}
+.vip-chip:active{ transform:scale(.98); }
+.vip-chip.active{
+  color:#201300;
+  background:linear-gradient(135deg,#ffb800,#ffe58a);
+  filter:brightness(1.02);
+}
 
-        const mm = Number(chip.getAttribute("data-m"));
-        selectedMonthsByPlan[planId] = mm;
+.vip-pricex{
+  text-align:center;
+  font-size:18px;
+  font-weight:1000;
+  color:#ffdd55;
+  margin:6px 0 12px;
+}
+.vip-timehint{
+  text-align:center;
+  font-size:12px;
+  opacity:.75;
+  margin-top:-6px;
+}
 
-        monthsWrap.querySelectorAll(".vip-chip").forEach(x => x.classList.remove("active"));
-        chip.classList.add("active");
-
-        const newPrice = calcVipPrice(plan, mm);
-        priceEl.textContent = `${newPrice.toFixed(2)} USDT`;
-        timeEl.textContent = `${mm}`;
-
-        // если уже выбран этот план — усилим визуально
-        if (selectedPlanId === planId) {
-          selectBtn.classList.add("selected");
-        }
-
-        haptic();
-      });
-    });
-
-    // выбрать план
-    selectBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-
-      selectedPlanId = planId;
-
-      // подсветка выбранной карточки + кнопки
-      view.querySelectorAll(".vip-cardx").forEach(c => c.classList.remove("selected"));
-      card.classList.add("selected");
-
-      view.querySelectorAll(".vip-select-btn").forEach(b => b.classList.remove("selected"));
-      selectBtn.classList.add("selected");
-
-      const months = selectedMonthsByPlan[planId];
-      const price = calcVipPrice(plan, months);
-
-      // отправляем в бота (потом привяжем оплату)
-      const payload = {
-        type: "vip",
-        plan_id: planId,
-        plan_name: plan.name,
-        months,
-        price_usdt: price
-      };
-
-      tg.sendData(JSON.stringify(payload));
-      haptic();
-      tg.showAlert(`Выбран: ${plan.name} • ${months} мес • ${price.toFixed(2)} USDT`);
-    });
-
-    // кликом по карточке тоже выбираем (удобно)
-    card.addEventListener("click", (e) => {
-      // если клик по кнопке/чипам — не дублируем
-      if (e.target.closest(".vip-chip") || e.target.closest("[data-select]")) return;
-      selectBtn.click();
-    });
-  });
-
-  document.getElementById("vipBack").onclick = () => navigate("catalog");
+.vip-select-btn{ width:100%; }
+.vip-select-btn.selected{ animation:selectGlow .9s ease-in-out infinite alternate; }
+@keyframes selectGlow{
+  0%{ box-shadow:0 0 0 1px rgba(255,255,255,.12), 0 10px 24px rgba(0,0,0,.80); }
+  100%{ box-shadow:0 0 0 1px rgba(255,219,120,.35), 0 14px 30px rgba(0,0,0,.92), 0 0 18px rgba(255,184,0,.25); }
 }
